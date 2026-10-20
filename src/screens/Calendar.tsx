@@ -12,6 +12,7 @@ import { coverageGaps, eventMatchesOwner, expandEvents, formatMinutes, personCon
 import { addDays, dateRange, isLocalDate, startOfWeek } from '../domain/dates'
 import { longDate } from '../lib/format'
 import { QuickAdd } from './Today'
+import { MicButton } from '../components/AddMenu'
 
 /** The family calendar: events and busy blocks two weeks at a time, with overlap and childcare warnings. */
 export function Calendar() {
@@ -42,9 +43,10 @@ export function Calendar() {
       <div className="mt-4">
         <OwnerFilterBar value={owner} onChange={setOwner} myId={myId} />
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="mt-3 grid grid-cols-3 gap-2">
         <QuickAdd icon={<CalendarPlus size={18} />} label="Event" onClick={() => setSheet({ kind: 'new', date: addDate })} />
-        <QuickAdd icon={<CircleSlash size={18} />} label="Busy time" onClick={() => setSheet({ kind: 'new', date: addDate, busy: true })} />
+        <QuickAdd icon={<CircleSlash size={18} />} label="Busy" onClick={() => setSheet({ kind: 'new', date: addDate, busy: true })} />
+        <MicButton />
       </div>
       <p className="mt-3 text-[13px] text-ink-muted">
         This calendar lives inside VishwarimaOS. It doesn’t sync with Google Calendar, and there are no push notifications yet.

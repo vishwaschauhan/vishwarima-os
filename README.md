@@ -25,6 +25,8 @@ billing account, Cloud Functions or Cloud Storage.
 | Install to the home screen (PWA manifest, app icon, offline app shell) | Done |
 | Deploy to Firebase Hosting, automatic deploys on merge | Done |
 | v2 · Family Whiteboard: shared message feed with pinned notes, reactions, edit/delete, links, search, unread badge, turn into a to-do or event | Done |
+| v2 · Voice Quick Add: speak or type a to-do, shopping item or event; editable preview; nothing saved until Confirm | Done |
+| v2 · "+" quick-add button on every main screen (task, shopping item, event, message, voice) | Done |
 | v2 · Photo and PDF uploads on the Whiteboard | Not built: Cloud Storage needs the Blaze billing plan (see below) |
 | v2 · Shared lists: to-do and shopping lists with live check-off, assignment, due dates, quantities, filters, search, reorder, clear purchased (archived, can be put back) | Done |
 
@@ -222,6 +224,33 @@ The **Whiteboard** tab is a shared, chronological message feed, newest at the bo
 bucket, including the default one ([Firebase FAQ](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024)).
 To stay entirely on the free Spark plan, share photos and documents as links (Google Photos,
 Google Drive) in a message. Uploads can be added later if billing is enabled.
+
+## Voice Quick Add
+
+Tap the microphone (on Today, Calendar, beside a list's add field, or **+ → Speak it**), say what
+to add, and check the preview. Nothing is saved until you tap **Confirm**; **Cancel** saves nothing.
+
+| Say | Becomes |
+| --- | --- |
+| “Add two cartons of milk to groceries” | Groceries item *Milk*, quantity 2 cartons |
+| “Remind Garima to order diapers by Thursday” | To-do *Order diapers* for Garima, due Thursday |
+| “Put my gym on the family calendar tomorrow from 6 to 7 PM” | Your busy event, tomorrow 6–7 PM |
+| “Add Vihan’s school event Saturday at 10 AM for both of us” | Shared event Saturday 10–11 AM (end time marked as assumed) |
+| “Add the appointment next Friday” | Asks for the start and end time before it can be saved |
+
+- Commands are understood by a small, deterministic parser in the app (`src/domain/voice.ts`),
+  not an AI service, so there is no cost or API key. It handles everyday English and the family's
+  names. Dates resolve in America/Chicago ("tomorrow" at 11:30 PM is still tomorrow, not UTC's).
+- It never fills in what wasn't said: a time without AM/PM, a missing time, or an unclear kind of
+  item is flagged on the preview. When no list is named it uses the list on screen or the first
+  list of that kind, and says so. The action is checked against a schema before the preview and
+  again before saving.
+- **Browser support:** speech recognition is built into Safari on iPhone and Chrome on Android
+  and desktop, but varies by version and settings, and some browsers lack it. Where it's missing or
+  the microphone is blocked, the same box accepts typing. Chrome needs a connection for speech.
+- **Privacy:** the browser turns speech into text and may send the audio to Apple or Google to do
+  it. VishwarimaOS never records, uploads or stores audio; only the confirmed item is saved.
+- Hindi and Hinglish aren't supported yet.
 
 ## How changes are saved
 

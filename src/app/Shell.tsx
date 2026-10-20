@@ -1,6 +1,8 @@
 import { CalendarDays, CalendarHeart, ListChecks, ListTodo, MessagesSquare, Settings as SettingsIcon, Sun } from 'lucide-react'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
+import { AddButton, AddMenu } from '../components/AddMenu'
 import { SyncStatus, Toasts } from '../components/bits'
+import { VoiceSheet } from '../components/VoiceSheet'
 import { Wordmark } from '../components/ui'
 import { Calendar } from '../screens/Calendar'
 import { Lists } from '../screens/Lists'
@@ -84,7 +86,7 @@ export function Shell() {
             </NavLink>
           </div>
         </header>
-        <main className="mx-auto max-w-2xl px-5 pt-2 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:max-w-none lg:px-8 lg:pb-12">
+        <main className="mx-auto max-w-2xl px-5 pt-2 pb-[calc(9rem+env(safe-area-inset-bottom))] lg:max-w-none lg:px-8 lg:pb-12">
           <Routes>
             <Route path="/" element={<Today />} />
             <Route path="/week" element={<Week />} />
@@ -99,6 +101,9 @@ export function Shell() {
       </div>
 
       <Toasts />
+      <AddButton />
+      <AddMenu />
+      <VoiceSheet />
 
       {/* Phone tab bar */}
       <nav
