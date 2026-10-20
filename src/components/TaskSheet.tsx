@@ -39,7 +39,9 @@ function TaskForm({ mode, onDone }: { mode: TaskSheetMode; onDone: () => void })
 
   const time = item?.occ.time ?? source?.time ?? undefined
   const [title, setTitle] = useState(item?.occ.title ?? '')
-  const [owner, setOwner] = useState<Owner>(item?.occ.owner ?? myId ?? 'unassigned')
+  // New tasks default to the signed-in member, who may not be known yet on first render.
+  const [chosenOwner, setOwner] = useState<Owner | null>(item?.occ.owner ?? null)
+  const owner = chosenOwner ?? myId ?? 'unassigned'
   const [date, setDate] = useState<string>(item ? item.occ.date : (mode.kind === 'new' ? (mode.date ?? '') : ''))
   const [start, setStart] = useState(time && 'start' in time ? time.start : '')
   const [end, setEnd] = useState(time && 'start' in time ? (time.end ?? '') : '')

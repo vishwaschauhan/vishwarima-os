@@ -40,9 +40,11 @@ function EventForm({ mode, onDone }: { mode: EventSheetMode; onDone: () => void 
   const [allDay, setAllDay] = useState(existing ? !existing.start : false)
   const [start, setStart] = useState(existing?.start ?? (busyDefault ? '17:30' : '09:00'))
   const [end, setEnd] = useState(existing?.end ?? (busyDefault ? '19:00' : '10:00'))
-  const [who, setWho] = useState<'vishwas' | 'garima' | 'both'>(
-    existing ? (existing.participants.length === 2 ? 'both' : (existing.participants[0] ?? 'both')) : (myId ?? 'both'),
+  // A new event defaults to the signed-in member, who may not be known yet on first render.
+  const [chosenWho, setWho] = useState<'vishwas' | 'garima' | 'both' | null>(
+    existing ? (existing.participants.length === 2 ? 'both' : (existing.participants[0] ?? 'both')) : null,
   )
+  const who = chosenWho ?? myId ?? 'both'
   const [busy, setBusyFlag] = useState(existing?.busy ?? true)
   const [visibility, setVisibility] = useState<FamilyEvent['visibility']>(existing?.visibility ?? 'shared')
   const [coverage, setCoverage] = useState<Coverage>(existing?.coverage ?? 'unassigned')
