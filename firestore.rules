@@ -1,0 +1,288 @@
+rules_version = '2';
+
+// VishwarimaOS security rules.
+// Every household document is readable and writable only by the household's members.
+// Writers must stamp their own uid; history (plan versions, activity) is append-only;
+// private event details are readable only by the event's owner.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    function verifiedEmail() {
+      return signedIn() && request.auth.token.email != null
+        && request.auth.token.email_verified == true
+        ? request.auth.token.email.lower() : '';
+    }
+
+    function householdPath(hid) {
+      return /databases/$(database)/documents/households/$(hid);
+    }
+
+    function household(hid) {
+      return get(householdPath(hid)).data;
+    }
+
+    function isMember(hid) {
+      return signedIn() && uid() in household(hid).memberUids;
+    }
+
+    function isAdmin(hid) {
+      return signedIn() && uid() in household(hid).adminUids;
+    }
+
+    // Same checks against the state after the current batch, so a household and
+    // its first documents can be created together.
+    function isMemberAfter(hid) {
+      return signedIn() && uid() in getAfter(householdPath(hid)).data.memberUids;
+    }
+
+    function isAdminAfter(hid) {
+      return signedIn() && uid() in getAfter(householdPath(hid)).data.adminUids;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function changed() {
+      return incoming().diff(resource.data).affectedKeys();
+    }
+
+    function stampedByMe() {
+      return incoming().updatedBy == uid() && incoming().updatedAt == request.time;
+    }
+
+    function isOwnerId(v) {
+      return v in ['vishwas', 'garima', 'both', 'unassigned'];
+    }
+
+    function isPlanMemberId(v) {
+      return v in ['vishwas', 'garima'];
+    }
+
+    function shortString(v, max) {
+      return v is string && v.size() > 0 && v.size() <= max;
+    }
+
+    function inviteFor(hid) {
+      return get(/databases/$(database)/documents/invites/$(verifiedEmail())).data;
+    }
+
+    function hasInviteTo(hid) {
+      return verifiedEmail() != ''
+        && exists(/databases/$(database)/documents/invites/$(verifiedEmail()))
+        && inviteFor(hid).householdId == hid;
+    }
+
+    // Invites are keyed by the invitee's lowercase email. Only an admin of the household
+    // creates one, and only the owner of that verified email can read it, so knowing a
+    // household ID is never enough to join.
+    match /invites/{email} {
+      allow read: if (signedIn() && verifiedEmail() == email)
+        || (signedIn() && isAdmin(resource.data.householdId));
+      allow create: if isAdmin(incoming().householdId)
+        && email == email.lower()
+        && incoming().keys().hasOnly(['householdId', 'planMemberId', 'role', 'invitedBy', 'createdAt'])
+        && isPlanMemberId(incoming().planMemberId)
+        && incoming().role in ['admin', 'member']
+        && incoming().invitedBy == uid()
+        && incoming().createdAt == request.time;
+      allow delete: if signedIn() && (isAdmin(resource.data.householdId) || verifiedEmail() == email);
+      allow update: if false;
+    }
+
+    match /households/{hid} {
+      allow read: if signedIn() && uid() in resource.data.memberUids;
+
+      allow create: if signedIn()
+        && incoming().keys().hasOnly(['name', 'timezone', 'ownerUid', 'adminUids', 'memberUids',
+             'activePlanVersion', 'firstUseDate', 'createdAt', 'updatedAt', 'updatedBy'])
+        && incoming().ownerUid == uid()
+        && incoming().memberUids == [uid()]
+        && incoming().adminUids == [uid()]
+        && shortString(incoming().name, 80)
+        && shortString(incoming().timezone, 64)
+        && incoming().createdAt == request.time
+        && stampedByMe();
+
+      // Admins manage settings and switch the active plan version (which must exist).
+      allow update: if isAdmin(hid)
+        && changed().hasOnly(['name', 'timezone', 'activePlanVersion', 'firstUseDate', 'updatedAt', 'updatedBy'])
+        && stampedByMe()
+        && (!('activePlanVersion' in changed())
+            || exists(/databases/$(database)/documents/households/$(hid)/planVersions/$(incoming().activePlanVersion)));
+
+      // Any member may record the first day the app was used, once.
+      allow update: if isMember(hid)
+        && changed().hasOnly(['firstUseDate', 'updatedAt', 'updatedBy'])
+        && !('firstUseDate' in resource.data)
+        && stampedByMe();
+
+      // An invited person adds only themselves.
+      allow update: if signedIn()
+        && !(uid() in resource.data.memberUids)
+        && hasInviteTo(hid)
+        && changed().hasOnly(['memberUids', 'adminUids', 'updatedAt', 'updatedBy'])
+        && incoming().memberUids == resource.data.memberUids.concat([uid()])
+        && (incoming().adminUids == resource.data.adminUids
+            || (inviteFor(hid).role == 'admin'
+                && incoming().adminUids == resource.data.adminUids.concat([uid()])))
+        && stampedByMe();
+
+      allow delete: if false;
+
+      match /members/{memberUid} {
+        allow read: if isMember(hid);
+        allow create: if memberUid == uid()
+          && isMemberAfter(hid)
+          && incoming().keys().hasOnly(['displayName', 'planMemberId', 'email', 'joinedAt'])
+          && shortString(incoming().displayName, 40)
+          && isPlanMemberId(incoming().planMemberId)
+          && incoming().joinedAt == request.time
+          // The founder picks their own plan identity; an invitee gets the one on their invite.
+          && (getAfter(householdPath(hid)).data.ownerUid == uid()
+              || incoming().planMemberId == inviteFor(hid).planMemberId);
+        allow update: if memberUid == uid() && isMember(hid)
+          && changed().hasOnly(['displayName'])
+          && shortString(incoming().displayName, 40);
+        allow delete: if false;
+      }
+
+      // Plan versions are immutable; a new version is a new document.
+      match /planVersions/{versionId} {
+        allow read: if isMember(hid);
+        allow create: if isAdminAfter(hid)
+          && incoming().keys().hasOnly(['markdown', 'effectiveFrom', 'authorUid', 'createdAt', 'note'])
+          && incoming().markdown is string && incoming().markdown.size() <= 100000
+          && incoming().effectiveFrom is string && incoming().effectiveFrom.matches('^\\d{4}-\\d{2}-\\d{2}$')
+          && incoming().authorUid == uid()
+          && incoming().createdAt == request.time;
+        allow update, delete: if false;
+      }
+
+      // Completion state for one generated occurrence, keyed `${taskId}_${date}_${n}`.
+      match /taskStates/{occurrenceKey} {
+        allow read: if isMember(hid);
+        allow create, update: if isMember(hid)
+          && incoming().keys().hasOnly(['taskId', 'date', 'title', 'completed', 'completedBy', 'completedAt',
+               'skipped', 'subtasks', 'response', 'updatedAt', 'updatedBy'])
+          && incoming().completed is bool
+          // Completing stamps the completer; undoing clears it.
+          && (incoming().completed
+              ? (incoming().completedBy == uid() && incoming().completedAt == request.time)
+                || (resource != null && resource.data.completed == true
+                    && incoming().completedBy == resource.data.completedBy
+                    && incoming().completedAt == resource.data.completedAt)
+              : incoming().get('completedBy', null) == null)
+          && stampedByMe();
+        allow delete: if false;
+      }
+
+      // Per-occurrence changes ("this occurrence only"); the plan itself is untouched.
+      match /taskOverrides/{occurrenceKey} {
+        allow read: if isMember(hid);
+        allow create, update: if isMember(hid)
+          && incoming().keys().hasOnly(['taskId', 'date', 'owner', 'assignedBy', 'time', 'movedTo', 'activated',
+               'snoozedUntil', 'cancelled', 'title', 'notes', 'subtaskOwners', 'updatedAt', 'updatedBy'])
+          && (!('owner' in incoming()) || isOwnerId(incoming().owner))
+          && (!('assignedBy' in incoming()) || incoming().assignedBy == uid()
+              || (resource != null && incoming().assignedBy == resource.data.get('assignedBy', null)))
+          && stampedByMe();
+        allow delete: if isMember(hid);
+      }
+
+      match /adHocTasks/{taskId} {
+        allow read: if isMember(hid);
+        allow create: if isMember(hid)
+          && shortString(incoming().title, 200)
+          && isOwnerId(incoming().owner)
+          && incoming().createdBy == uid()
+          && incoming().assignedBy == uid()
+          && incoming().createdAt == request.time
+          && stampedByMe();
+        allow update: if isMember(hid)
+          && shortString(incoming().title, 200)
+          && isOwnerId(incoming().owner)
+          && incoming().createdBy == resource.data.createdBy
+          && incoming().createdAt == resource.data.createdAt
+          && (!('owner' in changed()) || incoming().assignedBy == uid())
+          && stampedByMe();
+        allow delete: if isMember(hid);
+      }
+
+      // Shared event records. A private busy block carries only a generic title and
+      // no details; the real title and notes live in privateEventDetails.
+      match /events/{eventId} {
+        function privateIsGeneric() {
+          return incoming().visibility != 'private'
+            || (incoming().title == 'Busy'
+                && !incoming().keys().hasAny(['notes', 'location', 'description']));
+        }
+
+        allow read: if isMember(hid);
+        allow create: if isMember(hid)
+          && incoming().visibility in ['shared', 'private']
+          && shortString(incoming().title, 200)
+          && incoming().ownerUid == uid()
+          && incoming().createdBy == uid()
+          && incoming().createdAt == request.time
+          && privateIsGeneric()
+          && stampedByMe();
+        allow update: if isMember(hid)
+          && incoming().visibility in ['shared', 'private']
+          && shortString(incoming().title, 200)
+          && incoming().ownerUid == resource.data.ownerUid
+          && incoming().createdBy == resource.data.createdBy
+          && incoming().createdAt == resource.data.createdAt
+          // Only the owner edits a private block or changes visibility.
+          && ((resource.data.visibility == 'shared' && incoming().visibility == 'shared')
+              || resource.data.ownerUid == uid())
+          && privateIsGeneric()
+          && stampedByMe();
+        allow delete: if isMember(hid)
+          && (resource.data.visibility == 'shared' || resource.data.ownerUid == uid());
+      }
+
+      match /privateEventDetails/{eventId} {
+        allow read: if isMember(hid) && resource.data.ownerUid == uid();
+        allow create: if isMember(hid)
+          && incoming().ownerUid == uid()
+          && incoming().keys().hasOnly(['ownerUid', 'title', 'notes', 'location', 'updatedAt', 'updatedBy'])
+          && stampedByMe();
+        allow update: if isMember(hid)
+          && resource.data.ownerUid == uid()
+          && incoming().ownerUid == uid()
+          && incoming().keys().hasOnly(['ownerUid', 'title', 'notes', 'location', 'updatedAt', 'updatedBy'])
+          && stampedByMe();
+        allow delete: if isMember(hid) && resource.data.ownerUid == uid();
+      }
+
+      // Append-only change history.
+      match /activity/{activityId} {
+        allow read: if isMember(hid);
+        allow create: if isMemberAfter(hid)
+          && incoming().actorUid == uid()
+          && incoming().at == request.time
+          && shortString(incoming().action, 64);
+        allow update, delete: if false;
+      }
+
+      match /pilotReviews/{weekId} {
+        allow read: if isMember(hid);
+        allow create, update: if isMember(hid) && stampedByMe();
+        allow delete: if false;
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
