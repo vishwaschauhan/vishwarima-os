@@ -10,7 +10,7 @@ import { shortDate } from '../lib/format'
 import { OwnerBadge } from './bits'
 import { OWNER_BAR } from './owners'
 
-function Checkbox({ checked, label, onToggle, size = 'lg' }: { checked: boolean; label: string; onToggle: () => void; size?: 'lg' | 'sm' }) {
+export function Checkbox({ checked, label, onToggle, size = 'lg' }: { checked: boolean; label: string; onToggle: () => void; size?: 'lg' | 'sm' }) {
   const box = size === 'lg' ? 'size-7' : 'size-5'
   return (
     <button
@@ -184,7 +184,7 @@ function snoozeTarget(item: AgendaTask, today: string): string | null {
   return next <= addDays(item.originalDate, SNOOZE_WINDOW_DAYS) ? next : null
 }
 
-function Chip({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+export function Chip({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} className="min-h-9 rounded-full border border-line bg-canvas px-3.5 text-[13px] font-medium transition hover:border-ink-muted">
       {children}

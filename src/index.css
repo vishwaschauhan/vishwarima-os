@@ -123,3 +123,14 @@ dialog.sheet[open]::backdrop {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* New list items settle in gently. */
+.list-item-enter {
+  animation: item-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes item-in {
+  from {
+    transform: translateY(-4px);
+    opacity: 0;
+  }
+}

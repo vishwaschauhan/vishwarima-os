@@ -1,19 +1,23 @@
-import { CalendarDays, CalendarHeart, ListChecks, Settings as SettingsIcon, Sun } from 'lucide-react'
+import { CalendarDays, CalendarHeart, ListChecks, ListTodo, Settings as SettingsIcon, Sun } from 'lucide-react'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { SyncStatus, Toasts } from '../components/bits'
 import { Wordmark } from '../components/ui'
 import { Calendar } from '../screens/Calendar'
+import { Lists } from '../screens/Lists'
 import { Settings } from '../screens/Settings'
 import { Tasks } from '../screens/Tasks'
 import { Today } from '../screens/Today'
 import { Week } from '../screens/Week'
 
+// The phone tab bar keeps the everyday screens; Tasks (chores and scheduled tasks) opens from Lists and
+// Settings from the header. The desktop sidebar has room for all of them.
 const TABS = [
-  { to: '/', label: 'Today', icon: Sun, end: true },
-  { to: '/week', label: 'Week', icon: CalendarDays, end: false },
-  { to: '/tasks', label: 'Tasks', icon: ListChecks, end: false },
-  { to: '/calendar', label: 'Calendar', icon: CalendarHeart, end: false },
-  { to: '/settings', label: 'Settings', icon: SettingsIcon, end: false },
+  { to: '/', label: 'Today', icon: Sun, end: true, phone: true },
+  { to: '/week', label: 'Week', icon: CalendarDays, end: false, phone: true },
+  { to: '/lists', label: 'Lists', icon: ListTodo, end: false, phone: true },
+  { to: '/tasks', label: 'Tasks', icon: ListChecks, end: false, phone: false },
+  { to: '/calendar', label: 'Calendar', icon: CalendarHeart, end: false, phone: true },
+  { to: '/settings', label: 'Settings', icon: SettingsIcon, end: false, phone: false },
 ]
 
 export function Shell() {
@@ -40,13 +44,25 @@ export function Shell() {
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-10 flex min-h-14 items-center justify-between bg-canvas/85 px-5 backdrop-blur-md lg:justify-end">
           <Wordmark className="text-[18px] lg:hidden" />
-          <SyncStatus />
+          <div className="flex items-center gap-1">
+            <SyncStatus />
+            <NavLink
+              to="/settings"
+              aria-label="Settings"
+              className={({ isActive }) =>
+                `-mr-2 inline-flex size-11 items-center justify-center rounded-full transition lg:hidden ${isActive ? 'text-ink' : 'text-ink-muted hover:text-ink'}`
+              }
+            >
+              <SettingsIcon size={20} strokeWidth={1.8} aria-hidden />
+            </NavLink>
+          </div>
         </header>
         <main className="mx-auto max-w-2xl px-5 pt-2 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:max-w-none lg:px-8 lg:pb-12">
           <Routes>
             <Route path="/" element={<Today />} />
             <Route path="/week" element={<Week />} />
             <Route path="/tasks" element={<Tasks />} />
+            <Route path="/lists/:listId?" element={<Lists />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/settings/*" element={<Settings />} />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -62,7 +78,7 @@ export function Shell() {
         className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-canvas/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
       >
         <div className="mx-auto flex max-w-xl">
-          {TABS.map(({ to, label, icon: Icon, end }) => (
+          {TABS.filter((t) => t.phone).map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}

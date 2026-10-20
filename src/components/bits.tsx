@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, CloudOff, RefreshCw, X } from 'lucide-react'
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useToasts } from '../app/toast'
 import { useOnline } from '../app/useOnline'
 import { usePendingWrites } from '../data/live'
@@ -174,5 +174,40 @@ export function Toasts() {
         </p>
       ))}
     </div>
+  )
+}
+
+/** A destructive action that asks once more before it runs. */
+export function ConfirmButton({
+  children,
+  confirmLabel,
+  onConfirm,
+  className = '',
+}: {
+  children: ReactNode
+  confirmLabel: string
+  onConfirm: () => void
+  className?: string
+}) {
+  const [asking, setAsking] = useState(false)
+  useEffect(() => {
+    if (!asking) return
+    const t = setTimeout(() => setAsking(false), 4000)
+    return () => clearTimeout(t)
+  }, [asking])
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (!asking) return setAsking(true)
+        setAsking(false)
+        onConfirm()
+      }}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-[15px] font-medium transition ${
+        asking ? 'bg-danger text-canvas' : 'border border-line bg-surface text-ink hover:bg-canvas'
+      } ${className}`}
+    >
+      {asking ? confirmLabel : children}
+    </button>
   )
 }
