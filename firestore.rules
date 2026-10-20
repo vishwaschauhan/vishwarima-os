@@ -256,7 +256,7 @@ service cloud.firestore {
           let d = incoming();
           return d.keys().hasOnly(['listId', 'title', 'details', 'assignedTo', 'assignedBy', 'dueDate', 'priority',
                  'quantity', 'unit', 'store', 'price', 'completed', 'completedBy', 'completedAt', 'archived',
-                 'archivedBy', 'archivedAt', 'sortOrder', 'convertedTaskId', 'createdBy', 'createdAt', 'updatedAt', 'updatedBy'])
+                 'archivedBy', 'archivedAt', 'sortOrder', 'convertedTaskId', 'sourcePostId', 'createdBy', 'createdAt', 'updatedAt', 'updatedBy'])
             && d.listId is string
             && exists(/databases/$(database)/documents/households/$(hid)/lists/$(d.listId))
             && shortString(d.title, 200)
@@ -300,6 +300,63 @@ service cloud.firestore {
           && (!('archivedBy' in changed()) || incoming().archivedBy == uid() || incoming().archivedBy == null)
           && stampedByMe();
         allow delete: if isMember(hid);
+      }
+
+      // The family whiteboard: a shared message feed. Authors edit their own words; either of
+      // you pins or reacts (only with your own reaction); the author or an admin deletes.
+      match /whiteboardPosts/{postId} {
+        function postBody() {
+          return incoming().body is string && incoming().body.size() > 0 && incoming().body.size() <= 4000;
+        }
+
+        function unchangedIdentity() {
+          return incoming().authorId == resource.data.authorId
+            && incoming().createdAt == resource.data.createdAt;
+        }
+
+        allow read: if isMember(hid);
+        allow create: if isMember(hid)
+          && incoming().keys().hasOnly(['authorId', 'body', 'pinned', 'pinnedBy', 'reactions', 'deleted',
+               'createdAt', 'updatedAt', 'updatedBy'])
+          && incoming().authorId == uid()
+          && postBody()
+          && incoming().pinned == false
+          && incoming().get('pinnedBy', null) == null
+          && incoming().get('reactions', {}) == {}
+          && incoming().deleted == false
+          && incoming().createdAt == request.time
+          && stampedByMe();
+
+        allow update: if isMember(hid) && unchangedIdentity() && stampedByMe() && (
+          // The author edits a message that hasn't been deleted.
+          (resource.data.authorId == uid()
+            && resource.data.deleted == false
+            && changed().hasOnly(['body', 'editedAt', 'updatedAt', 'updatedBy'])
+            && postBody()
+            && incoming().editedAt == request.time)
+          // Either of you pins or unpins.
+          || (resource.data.deleted == false
+            && changed().hasOnly(['pinned', 'pinnedBy', 'updatedAt', 'updatedBy'])
+            && incoming().pinned is bool
+            && (incoming().pinned ? incoming().pinnedBy == uid() : incoming().pinnedBy == null))
+          // Your own reaction only.
+          || (resource.data.deleted == false
+            && changed().hasOnly(['reactions', 'updatedAt', 'updatedBy'])
+            && incoming().reactions is map
+            && incoming().reactions.diff(resource.data.get('reactions', {})).affectedKeys().hasOnly([uid()])
+            && (!(uid() in incoming().reactions)
+                || (incoming().reactions[uid()] is string && incoming().reactions[uid()].size() <= 16)))
+          // The author or an admin deletes: the text is cleared, the record kept.
+          || ((resource.data.authorId == uid() || isAdmin(hid))
+            && changed().hasOnly(['body', 'deleted', 'deletedBy', 'deletedAt', 'pinned', 'pinnedBy', 'reactions', 'updatedAt', 'updatedBy'])
+            && incoming().deleted == true
+            && incoming().deletedBy == uid()
+            && incoming().deletedAt == request.time
+            && incoming().body == ''
+            && incoming().pinned == false
+            && incoming().reactions == {})
+        );
+        allow delete: if false;
       }
 
       // Shared event records. A private busy block carries only a generic title and

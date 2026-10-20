@@ -1,8 +1,8 @@
 import type { User } from 'firebase/auth'
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import type { Household } from '../data/household'
 import { useAdHocTasks, useMembers, usePrivateDetails, type Member, type PrivateDetails } from '../data/live'
-import { useActiveListItems, useListDefs } from '../data/lists'
+import { ensureDefaultLists, useActiveListItems, useListDefs } from '../data/lists'
 import { recordFirstUse, type Actor } from '../data/mutations'
 import { usePlanVersions, type StoredPlanVersion } from '../data/plans'
 import type { AdHocTask, PersonId } from '../domain/agenda'
@@ -53,6 +53,16 @@ export function HouseholdProvider({ user, household, children }: { user: User; h
     if (!household.firstUseDate) recordFirstUse(actor, today).catch(() => {})
   }, [household.firstUseDate, actor, today])
 
+  // Starter lists, created once for the household, as soon as the server confirms it has none.
+  const seeded = useRef(false)
+  const listsLoaded = !lists.loading && !lists.fromCache
+  useEffect(() => {
+    if (listsLoaded && lists.data.length === 0 && !seeded.current) {
+      seeded.current = true
+      ensureDefaultLists(actor).catch(() => {})
+    }
+  }, [listsLoaded, lists.data.length, actor])
+
   const value = useMemo<HouseholdCtx>(() => {
     const me = members.data.find((m) => m.uid === user.uid)
     const byUid = new Map(members.data.map((m) => [m.uid, m]))
@@ -74,13 +84,12 @@ export function HouseholdProvider({ user, household, children }: { user: User; h
       adHoc: adHoc.data,
       privateDetails: new Map(privateDetails.data.map((d) => [d.id, d])),
       lists: sortLists(lists.data),
-      // Loaded once the server has answered, so starter lists are never created from an empty cache.
-      listsLoaded: !lists.loading && !lists.fromCache,
+      listsLoaded,
       listItems: listItems.data,
       today,
       timezone: household.timezone,
     }
-  }, [user, household, actor, members.data, plans, adHoc.data, privateDetails.data, lists, listItems.data, today])
+  }, [user, household, actor, members.data, plans, adHoc.data, privateDetails.data, lists, listsLoaded, listItems.data, today])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

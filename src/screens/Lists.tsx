@@ -9,7 +9,7 @@ import { ListItemRow } from '../components/ListItemRow'
 import { ListItemSheet, type ItemSheetMode } from '../components/ListItemSheet'
 import { ManageListsSheet } from '../components/ManageListsSheet'
 import { Sheet } from '../components/bits'
-import { clearCompleted, createItem, ensureDefaultLists, restoreItem, swapOrder, useClearedItems } from '../data/lists'
+import { clearCompleted, createItem, restoreItem, swapOrder, useClearedItems } from '../data/lists'
 import {
   estimatedTotal,
   filterItems,
@@ -24,18 +24,9 @@ import {
 
 /** Shared to-do and shopping lists. `/lists/:listId` shows one list; `/lists` opens the last one used. */
 export function Lists() {
-  const { lists, listsLoaded, actor } = useHousehold()
+  const { lists, listsLoaded } = useHousehold()
   const { listId } = useParams()
   const [last, setLast] = useStoredState<string | null>('lists.last', null)
-
-  // Starter lists, created once for the household the first time anyone opens Lists.
-  const seeded = useRef(false)
-  useEffect(() => {
-    if (listsLoaded && lists.length === 0 && !seeded.current) {
-      seeded.current = true
-      ensureDefaultLists(actor).catch(() => {})
-    }
-  }, [listsLoaded, lists.length, actor])
 
   const active = lists.filter((l) => !l.archived)
   const list = lists.find((l) => l.id === listId)

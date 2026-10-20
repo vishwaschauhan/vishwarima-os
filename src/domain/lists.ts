@@ -39,6 +39,8 @@ export interface ListItem {
   createdAt?: Date | null
   /** Set when the to-do was turned into a calendar task, so it is never converted twice. */
   convertedTaskId?: string | null
+  /** The whiteboard message it was made from. */
+  sourcePostId?: string | null
   pending?: boolean
 }
 

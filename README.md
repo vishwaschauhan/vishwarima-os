@@ -24,6 +24,8 @@ billing account, Cloud Functions or Cloud Storage.
 | Design pass: Inter and Newsreader fonts, light/dark/system theme, portrait greeting, sheet animation | Done |
 | Install to the home screen (PWA manifest, app icon, offline app shell) | Done |
 | Deploy to Firebase Hosting, automatic deploys on merge | Done |
+| v2 · Family Whiteboard: shared message feed with pinned notes, reactions, edit/delete, links, search, unread badge, turn into a to-do or event | Done |
+| v2 · Photo and PDF uploads on the Whiteboard | Not built: Cloud Storage needs the Blaze billing plan (see below) |
 | v2 · Shared lists: to-do and shopping lists with live check-off, assignment, due dates, quantities, filters, search, reorder, clear purchased (archived, can be put back) | Done |
 
 ## Project layout
@@ -155,6 +157,7 @@ All data lives under `households/{householdId}`:
 | `…/activity/{id}` | append-only change history |
 | `…/pilotReviews/{weekId}` | weekly review notes |
 | `…/lists/{listId}` | shared list: title, `todo` or `shopping`, order, archived |
+| `…/whiteboardPosts/{postId}` | message: author, text, pinned (by), reactions (one per person), edited/deleted time |
 | `…/listItems/{itemId}` | list item: list, title, notes, assignee, due date, priority, quantity, unit, store, price, completed by/at, archived (cleared) |
 | `invites/{email}` | pending invite: household, plan identity, role |
 
@@ -176,6 +179,9 @@ November 1, 2026 DST change never moves a task to another day.
   or switch the active one, and the active version must exist.
 - A private busy block's shared record must be titled "Busy" with no notes or location. Its real
   details are in a separate document only the owner can read. Only the owner can edit or delete it.
+- Whiteboard messages are posted only in your own name and edited only by their author. Pinning
+  is stamped with who pinned; you can only set your own reaction; only the author or an admin can
+  delete.
 - List items must belong to an existing list of the household, can only be assigned to Vishwas,
   Garima, both or anyone, and are checked off only in your own name. Field types and sizes are
   checked; a list's type and an item's creator never change.
@@ -198,6 +204,24 @@ archive lists under **Manage lists**; archiving keeps every item.
   item in the same write, so it is never in both places.
 
 List items live in Firestore only. The Markdown family plan never reads or overwrites them.
+
+## Family Whiteboard
+
+The **Whiteboard** tab is a shared, chronological message feed, newest at the bottom.
+
+- Write a note and tap the arrow (⌘/Ctrl+Enter on a computer). `**bold**`, `*italic*` and
+  `` `code` `` work; web links become tappable chips. Text is never rendered as HTML.
+- Tap a message to react, pin it to the strip at the top, copy it, turn it into a to-do (which
+  links back to the message) or an event, edit it (your own only) or delete it (your own, or any as
+  an admin; asks twice). Deleting clears the text and keeps a record.
+- The tab shows how many new messages your partner has posted since this phone last opened it.
+  There are no push notifications.
+- The feed loads the newest 30 messages and more on request, rather than reading everything.
+
+**Photos and PDFs.** Firebase now requires the Blaze (pay as you go) plan for any Cloud Storage
+bucket, including the default one ([Firebase FAQ](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024)).
+To stay entirely on the free Spark plan, share photos and documents as links (Google Photos,
+Google Drive) in a message. Uploads can be added later if billing is enabled.
 
 ## How changes are saved
 

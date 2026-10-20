@@ -13,7 +13,7 @@ import { EVENT_TYPES, useEventTitle } from './eventLabels'
 import { TextArea } from './TaskSheet'
 
 export type EventSheetMode =
-  | { kind: 'new'; date: string; busy?: boolean }
+  | { kind: 'new'; date: string; busy?: boolean; title?: string; notes?: string; start?: string; end?: string; who?: 'vishwas' | 'garima' | 'both' }
   | { kind: 'edit'; event: FamilyEvent }
 
 export function EventSheet({ mode, onClose }: { mode: EventSheetMode | null; onClose: () => void }) {
@@ -34,15 +34,16 @@ function EventForm({ mode, onDone }: { mode: EventSheetMode; onDone: () => void 
   const isOwner = !existing || existing.ownerUid === user.uid
   const busyDefault = mode.kind === 'new' ? Boolean(mode.busy) : false
 
-  const [title, setTitle] = useState(details?.title ?? (existing?.visibility === 'private' ? '' : (existing?.title ?? '')))
+  const preset = mode.kind === 'new' ? mode : undefined
+  const [title, setTitle] = useState(details?.title ?? (existing?.visibility === 'private' ? '' : (existing?.title ?? preset?.title ?? '')))
   const [type, setType] = useState<FamilyEvent['type']>(existing && existing.type !== 'busy' ? existing.type : busyDefault ? 'gym' : 'appointment')
   const [date, setDate] = useState(existing?.date ?? (mode.kind === 'new' ? mode.date : ''))
   const [allDay, setAllDay] = useState(existing ? !existing.start : false)
-  const [start, setStart] = useState(existing?.start ?? (busyDefault ? '17:30' : '09:00'))
-  const [end, setEnd] = useState(existing?.end ?? (busyDefault ? '19:00' : '10:00'))
+  const [start, setStart] = useState(existing?.start ?? preset?.start ?? (busyDefault ? '17:30' : '09:00'))
+  const [end, setEnd] = useState(existing?.end ?? preset?.end ?? (busyDefault ? '19:00' : '10:00'))
   // A new event defaults to the signed-in member, who may not be known yet on first render.
   const [chosenWho, setWho] = useState<'vishwas' | 'garima' | 'both' | null>(
-    existing ? (existing.participants.length === 2 ? 'both' : (existing.participants[0] ?? 'both')) : null,
+    existing ? (existing.participants.length === 2 ? 'both' : (existing.participants[0] ?? 'both')) : (preset?.who ?? null),
   )
   const who = chosenWho ?? myId ?? 'both'
   const [busy, setBusyFlag] = useState(existing?.busy ?? true)
@@ -54,7 +55,7 @@ function EventForm({ mode, onDone }: { mode: EventSheetMode; onDone: () => void 
   )
   const [until, setUntil] = useState(existing && existing.recurrence.type !== 'none' ? (existing.recurrence.until ?? '') : '')
   const [location, setLocation] = useState(details?.location ?? existing?.location ?? '')
-  const [notes, setNotes] = useState(details?.notes ?? existing?.notes ?? '')
+  const [notes, setNotes] = useState(details?.notes ?? existing?.notes ?? preset?.notes ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
