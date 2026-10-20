@@ -42,12 +42,12 @@ test('Vishwas founds the household and Garima joins by invite', async ({ browser
   await snap(vishwas, 'setup')
   await vishwas.getByRole('button', { name: 'Create household' }).click()
 
-  await expect(vishwas.getByText('Singh Family')).toBeVisible()
   // Today's plan comes from config/family-plan.md: the daily resets are always there.
-  await expect(vishwas.getByText('Living area cleanup')).toBeVisible()
-  await expect(vishwas.getByText('Kitchen cleanup')).toBeVisible()
+  await expect(vishwas.getByText('Living area cleanup', { exact: true })).toBeVisible()
+  await expect(vishwas.getByText('Kitchen cleanup', { exact: true })).toBeVisible()
 
   await snap(vishwas, 'home')
+  await vishwas.getByRole('link', { name: 'Settings' }).click()
   await vishwas.getByLabel('Partner’s email').fill('Garima@Example.com')
   await vishwas.getByRole('button', { name: 'Create invite' }).click()
   await expect(vishwas.getByText('Invite ready.')).toBeVisible()
@@ -72,8 +72,7 @@ test('Vishwas founds the household and Garima joins by invite', async ({ browser
 
   await expect(garima.getByRole('heading', { name: 'You’re invited' })).toBeVisible()
   await garima.getByRole('button', { name: 'Join household' }).click()
-  await expect(garima.getByText('Singh Family')).toBeVisible()
-  await expect(garima.getByText('Kitchen cleanup')).toBeVisible()
+  await expect(garima.getByText('Kitchen cleanup', { exact: true })).toBeVisible()
 
   // Once both have joined, the invite card disappears for Vishwas in real time.
   await expect(vishwas.getByRole('heading', { name: 'Invite your partner' })).toBeHidden()

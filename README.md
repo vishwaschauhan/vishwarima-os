@@ -13,14 +13,15 @@ billing account, Cloud Functions or Cloud Storage.
 
 | Area | State |
 | --- | --- |
-| Sign-in (Google, email and password) | Done |
-| Household setup and partner invite | Done |
+| Sign-in (Google, email and password), household setup, partner invite | Done |
 | Family plan (`config/family-plan.md`), validation and schedule engine | Done |
-| Firestore security rules with emulator tests | Done |
-| Today (read-only list of today's plan) | Done |
-| Task completion and live sync, Week, Tasks, Family Calendar | Next |
-| Plan upload, preview and apply; pilot review | Next |
-| Full visual design, PWA install, app icon | Next |
+| Today: date navigation, owner filters, completion with live sync, subtasks, snooze, skip, quick add, tomorrow preview | Done |
+| Week: date strip on phones, seven columns on desktop, two-week pilot view, filters | Done |
+| Tasks: overdue, today, to-dos, next 7 days, to-discuss; create, edit, reassign, delete | Done |
+| Family Calendar: events and busy blocks, private "Busy" blocks, childcare coverage, overlap warnings | Done |
+| Settings: plan download, upload, preview and apply; cleaning-team setup; pilot review; activity; JSON export | Done |
+| Offline use with pending-sync indicator | Done |
+| Full visual design pass, PWA install, app icon | Next |
 
 ## Project layout
 
@@ -68,7 +69,7 @@ npm run build
 4. **Project overview → Add app → Web.** Register the app and copy its `firebaseConfig`.
 5. Copy `.env.example` to `.env` and fill in the values from `firebaseConfig`. These identify
    the project; they are not secrets. Access is enforced by `firestore.rules`.
-6. Copy `.firebaserc.example` to `.firebaserc` and set your project ID.
+6. `.firebaserc` points at the `vishwarima-os` project; change it if you use another project ID.
 
 ### Authorized domains
 
@@ -137,6 +138,22 @@ November 1, 2026 DST change never moves a task to another day.
   or switch the active one, and the active version must exist.
 - A private busy block's shared record must be titled "Busy" with no notes or location. Its real
   details are in a separate document only the owner can read. Only the owner can edit or delete it.
+
+## How changes are saved
+
+- **Completing a task** writes `taskStates/{occurrenceKey}`. Either of you can complete or undo a
+  shared task; whoever completes it is recorded. Concurrent edits are last-write-wins per field
+  (Firestore merges), so ticking a subtask never un-completes the task.
+- **Editing "this day only"** writes `taskOverrides/{occurrenceKey}`: owner, time, title, notes or a
+  new date. The plan isn't touched. Reassigning records who assigned it.
+- **Editing "this and future"** on a plan task saves a new plan version effective from that date
+  (admins only). On an app-created repeating task it ends the old task the day before and starts a
+  new one, so earlier days keep their history.
+- **Snoozing** moves an occurrence up to 14 days ahead.
+- **Plan versions** are numbered `v1`, `v2`, … and can't be overwritten. The newest version whose
+  effective date is on or before a day applies to that day. If two people apply a plan at the same
+  moment, the second apply fails rather than replacing the first.
+- Every change is listed under **Settings → Activity**.
 
 ## Offline use
 

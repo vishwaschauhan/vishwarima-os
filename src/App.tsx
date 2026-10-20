@@ -1,12 +1,14 @@
 import type { User } from 'firebase/auth'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
+import { BrowserRouter } from 'react-router-dom'
 import { ErrorText, Wordmark } from './components/ui'
 import { friendlyError } from './lib/errors'
 import { findInvite, findMyHousehold, type Household, type Invite } from './data/household'
 import { AuthProvider, useAuth } from './lib/auth'
 import { firebase, firebaseConfigured } from './lib/firebase'
-import { Home } from './screens/Home'
+import { HouseholdProvider } from './app/household'
+import { Shell } from './app/Shell'
 import { HouseholdSetup } from './screens/HouseholdSetup'
 import { SignIn } from './screens/SignIn'
 
@@ -87,7 +89,13 @@ function LiveHousehold({ user, householdId }: { user: User; householdId: string 
       </Centered>
     )
   if (!household) return <Splash />
-  return <Home user={user} household={household} />
+  return (
+    <HouseholdProvider user={user} household={household}>
+      <BrowserRouter>
+        <Shell />
+      </BrowserRouter>
+    </HouseholdProvider>
+  )
 }
 
 function Splash() {

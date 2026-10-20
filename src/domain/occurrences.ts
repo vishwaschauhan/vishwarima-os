@@ -29,11 +29,20 @@ export function occurrenceKey(taskId: string, date: LocalDate, n = 0): string {
   return `${taskId}_${date}_${n}`
 }
 
-/** The version in effect on `date`: the latest one whose effectiveFrom is on or before it. */
-export function versionForDate(versions: PlanVersion[], date: LocalDate): PlanVersion | undefined {
-  let best: PlanVersion | undefined
+/** Order of creation: `v12` → 12. Later versions win over earlier ones. */
+function versionSeq(v: PlanVersion): number {
+  return Number(/^v(\d+)$/.exec(v.id)?.[1] ?? 0)
+}
+
+/**
+ * The version in effect on `date`: the most recently created one whose effectiveFrom is on or
+ * before it. A newer version with an earlier effective date therefore replaces an older one
+ * from that date on, while dates before it keep whatever applied then.
+ */
+export function versionForDate<V extends PlanVersion>(versions: V[], date: LocalDate): V | undefined {
+  let best: V | undefined
   for (const v of versions) {
-    if (v.effectiveFrom <= date && (!best || v.effectiveFrom >= best.effectiveFrom)) best = v
+    if (v.effectiveFrom <= date && (!best || versionSeq(v) > versionSeq(best))) best = v
   }
   return best
 }
