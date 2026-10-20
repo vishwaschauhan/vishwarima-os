@@ -93,3 +93,18 @@ test('an ambiguous command asks for what’s missing before it can be saved', as
   await sheet.getByLabel(/^End/).fill('15:00')
   await expect(sheet.getByRole('button', { name: 'Confirm' })).toBeEnabled()
 })
+
+test('direct links (for iPhone Shortcuts) open quick add on arrival', async ({ browser }) => {
+  const { v } = await household(browser)
+  await fakeSpeech(v, 'Add eggs to groceries')
+  await v.goto('/lists/groceries?add=voice')
+  const sheet = v.getByRole('dialog', { name: 'Speak or type' })
+  await expect(sheet.getByText('“Add eggs to groceries”')).toBeVisible()
+  await expect(sheet.getByLabel('Title')).toHaveValue('Eggs')
+  await expect(v).toHaveURL(/\/lists\/groceries$/)
+  await sheet.getByRole('button', { name: 'Cancel' }).click()
+
+  await v.goto('/?add=task')
+  await expect(v.getByRole('dialog', { name: 'New task' })).toBeVisible()
+  await expect(v).toHaveURL(/\/$/)
+})

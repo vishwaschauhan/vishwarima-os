@@ -1,5 +1,5 @@
 import { CalendarPlus, ListPlus, MessageSquarePlus, Mic, Plus, ShoppingBasket } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useHousehold } from '../app/household'
 import { closeAddMenu, openAddMenu, openVoice, useQuickAdd } from '../app/quickAdd'
@@ -37,6 +37,27 @@ export function AddMenu() {
   const day = new URLSearchParams(search).get('d') ?? today
   const listOnScreen = /^\/lists\/([^/]+)/.exec(pathname)?.[1]
   const shoppingList = lists.find((l) => l.id === listOnScreen && l.type === 'shopping') ?? lists.find((l) => !l.archived && l.type === 'shopping')
+
+  // Direct links for iPhone Shortcuts and bookmarks: ?add=voice|menu|task|item|event opens that
+  // quick add on arrival (e.g. /lists/groceries?add=voice). The parameter is removed once handled.
+  const add = new URLSearchParams(search).get('add')
+  const listsReady = lists.length > 0
+  useEffect(() => {
+    if (!add || (add === 'item' && !listsReady)) return
+    const params = new URLSearchParams(search)
+    params.delete('add')
+    const rest = params.toString()
+    navigate(`${pathname}${rest ? `?${rest}` : ''}`, { replace: true })
+    const date = pathname === '/' || pathname === '/week' ? day : today
+    // The link is outside input arriving once, so opening a sheet from this effect is intended.
+    /* oxlint-disable react/set-state-in-effect */
+    if (add === 'voice') openVoice({ listId: listOnScreen })
+    else if (add === 'menu') openAddMenu()
+    else if (add === 'task') setTask({ kind: 'new', date })
+    else if (add === 'event') setEvent({ kind: 'new', date })
+    else if (add === 'item' && shoppingList) setItem({ kind: 'new', listId: shoppingList.id })
+    /* oxlint-enable react/set-state-in-effect */
+  }, [add, listsReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
