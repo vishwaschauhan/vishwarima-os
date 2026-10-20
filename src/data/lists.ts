@@ -58,6 +58,7 @@ function toItem(d: QueryDocumentSnapshot<DocumentData>): ListItem {
     createdBy: x.createdBy,
     createdAt: toDate(x.createdAt),
     convertedTaskId: x.convertedTaskId ?? null,
+    sourcePostId: x.sourcePostId ?? null,
     pending: d.metadata.hasPendingWrites,
   }
 }
@@ -136,6 +137,8 @@ export interface ItemInput {
   unit: string | null
   store: string | null
   price: number | null
+  /** The whiteboard message this to-do was made from. */
+  sourcePostId?: string | null
 }
 
 /** Pre-generated ID for a new item, so callers can refer to it before the write lands. */

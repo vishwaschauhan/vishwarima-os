@@ -1,5 +1,6 @@
 import { CalendarPlus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { useHousehold } from '../app/household'
 import { background } from '../app/toast'
 import { convertToTask, createItem, deleteItem, updateItem, type ItemInput } from '../data/lists'
@@ -10,7 +11,9 @@ import { ConfirmButton, Segmented, Sheet } from './bits'
 import { TextArea } from './TaskSheet'
 import { Button, ErrorText, Field } from './ui'
 
-export type ItemSheetMode = { kind: 'new'; listId: string; title?: string; dueDate?: string } | { kind: 'edit'; item: ListItem }
+export type ItemSheetMode =
+  | { kind: 'new'; listId: string; title?: string; dueDate?: string; details?: string; sourcePostId?: string }
+  | { kind: 'edit'; item: ListItem }
 
 const OWNERS: { value: Owner; label: string }[] = [
   { value: 'unassigned', label: 'Anyone' },
@@ -45,7 +48,8 @@ function ItemForm({ mode, onDone }: { mode: ItemSheetMode; onDone: () => void })
   const [unit, setUnit] = useState(item?.unit ?? '')
   const [store, setStore] = useState(item?.store ?? '')
   const [price, setPrice] = useState(item?.price != null ? String(item.price) : '')
-  const [details, setDetails] = useState(item?.details ?? '')
+  const [details, setDetails] = useState(item?.details ?? (mode.kind === 'new' ? (mode.details ?? '') : ''))
+  const sourcePostId = item?.sourcePostId ?? (mode.kind === 'new' ? mode.sourcePostId : undefined)
   const [error, setError] = useState('')
 
   function input(): ItemInput | string {
@@ -66,6 +70,7 @@ function ItemForm({ mode, onDone }: { mode: ItemSheetMode; onDone: () => void })
       unit: unit.trim().slice(0, 20) || null,
       store: store.trim().slice(0, 40) || null,
       price: p === null ? null : Math.round(p * 100) / 100,
+      ...(mode.kind === 'new' && mode.sourcePostId ? { sourcePostId: mode.sourcePostId } : {}),
     }
   }
 
@@ -143,6 +148,11 @@ function ItemForm({ mode, onDone }: { mode: ItemSheetMode; onDone: () => void })
       )}
 
       <TextArea label="Notes" value={details} onChange={setDetails} rows={2} />
+      {sourcePostId && (
+        <Link to={`/whiteboard#post-${sourcePostId}`} className="block text-[13px] text-ink-muted underline underline-offset-2">
+          Made from a whiteboard message
+        </Link>
+      )}
 
       <ErrorText>{error}</ErrorText>
       <div className="flex flex-wrap gap-2 pt-1">

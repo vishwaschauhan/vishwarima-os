@@ -199,7 +199,7 @@ function ExportData() {
     try {
       const { db } = firebase()
       const out: Record<string, unknown> = { exportedAt: new Date().toISOString(), household }
-      for (const name of ['members', 'planVersions', 'taskStates', 'taskOverrides', 'adHocTasks', 'events', 'activity', 'pilotReviews', 'lists', 'listItems']) {
+      for (const name of ['members', 'planVersions', 'taskStates', 'taskOverrides', 'adHocTasks', 'events', 'activity', 'pilotReviews', 'lists', 'listItems', 'whiteboardPosts']) {
         const snap = await getDocs(collection(db, 'households', household.id, name))
         out[name] = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
       }
@@ -254,6 +254,9 @@ const ACTION_LABEL: Record<string, string> = {
   'item.deleted': 'deleted',
   'item.restored': 'put back',
   'item.converted': 'turned into a task:',
+  'post.pinned': 'pinned',
+  'post.unpinned': 'unpinned',
+  'post.deleted': 'deleted',
 }
 
 function Activity() {

@@ -75,12 +75,12 @@ async function inviteGarima(role: 'admin' | 'member' = 'admin') {
   })
 }
 
-async function garimaJoins() {
+async function garimaJoins(asAdmin = true) {
   const g = db(GARIMA, GARIMA_EMAIL)
   const batch = writeBatch(g)
   batch.update(doc(g, 'households', HID), {
     memberUids: arrayUnion(GARIMA),
-    adminUids: arrayUnion(GARIMA),
+    ...(asAdmin ? { adminUids: arrayUnion(GARIMA) } : {}),
     ...stamp(GARIMA),
   })
   batch.set(doc(g, 'households', HID, 'members', GARIMA), {
@@ -621,5 +621,81 @@ describe('shared lists', () => {
     await assertSucceeds(setDoc(doc(v, 'households', HID, 'lists', 'kids'), { ...groceries(), title: 'Kids', type: 'todo' }))
     // A second create of the same list would be an update that rewrites its creator.
     await assertFails(setDoc(doc(db(GARIMA, GARIMA_EMAIL), 'households', HID, 'lists', 'kids'), { ...groceries(), title: 'Kids', type: 'todo', createdBy: GARIMA, ...stamp(GARIMA) }))
+  })
+})
+
+describe('family whiteboard', () => {
+  beforeEach(async () => {
+    await foundHousehold()
+    await inviteGarima('member')
+    await garimaJoins(false)
+  })
+
+  const post = (uid: string, extra: Record<string, unknown> = {}) => ({
+    authorId: uid,
+    body: 'Vihan’s school photo day is Friday',
+    pinned: false,
+    pinnedBy: null,
+    reactions: {},
+    deleted: false,
+    createdAt: serverTimestamp(),
+    ...stamp(uid),
+    ...extra,
+  })
+  const ref = (uid: string, id = 'p1') =>
+    doc(db(uid, uid === GARIMA ? GARIMA_EMAIL : undefined), 'households', HID, 'whiteboardPosts', id)
+
+  it('lets members post as themselves and read each other’s posts', async () => {
+    await assertSucceeds(setDoc(ref(VISHWAS), post(VISHWAS)))
+    await assertSucceeds(getDoc(ref(GARIMA)))
+    await assertFails(setDoc(ref(VISHWAS, 'p2'), post(GARIMA)))
+    await assertFails(setDoc(ref(VISHWAS, 'p3'), post(VISHWAS, { body: '' })))
+    await assertFails(setDoc(ref(VISHWAS, 'p4'), post(VISHWAS, { body: 'x'.repeat(4001) })))
+    await assertFails(setDoc(ref(VISHWAS, 'p5'), post(VISHWAS, { image: 'data:image/png;base64,AAAA' })))
+  })
+
+  it('lets only the author edit, and marks the edit', async () => {
+    await setDoc(ref(VISHWAS), post(VISHWAS))
+    await assertSucceeds(updateDoc(ref(VISHWAS), { body: 'Photo day moved to Monday', editedAt: serverTimestamp(), ...stamp(VISHWAS) }))
+    await assertFails(updateDoc(ref(GARIMA), { body: 'Changed by Garima', editedAt: serverTimestamp(), ...stamp(GARIMA) }))
+    await assertFails(updateDoc(ref(VISHWAS), { body: 'Sneaky', ...stamp(VISHWAS) }))
+  })
+
+  it('lets either member pin, and each react only for themselves', async () => {
+    await setDoc(ref(VISHWAS), post(VISHWAS))
+    await assertSucceeds(updateDoc(ref(GARIMA), { pinned: true, pinnedBy: GARIMA, ...stamp(GARIMA) }))
+    await assertFails(updateDoc(ref(GARIMA), { pinned: true, pinnedBy: VISHWAS, ...stamp(GARIMA) }))
+    await assertSucceeds(updateDoc(ref(GARIMA), { [`reactions.${GARIMA}`]: '❤️', ...stamp(GARIMA) }))
+    await assertFails(updateDoc(ref(GARIMA), { [`reactions.${VISHWAS}`]: '👍', ...stamp(GARIMA) }))
+  })
+
+  it('lets the author or an admin delete, and nobody else', async () => {
+    const del = (uid: string) => ({
+      body: '',
+      deleted: true,
+      deletedBy: uid,
+      deletedAt: serverTimestamp(),
+      pinned: false,
+      pinnedBy: null,
+      reactions: {},
+      ...stamp(uid),
+    })
+    // Garima is a member, not an admin, in this household.
+    await setDoc(ref(VISHWAS), post(VISHWAS))
+    await assertFails(updateDoc(ref(GARIMA), del(GARIMA)))
+    await setDoc(ref(GARIMA, 'g1'), post(GARIMA))
+    await assertSucceeds(updateDoc(ref(VISHWAS, 'g1'), del(VISHWAS)))
+    await assertSucceeds(updateDoc(ref(VISHWAS), del(VISHWAS)))
+    await assertFails(deleteDoc(ref(VISHWAS, 'p1')))
+    // A deleted message can't be edited back.
+    await assertFails(updateDoc(ref(VISHWAS), { body: 'Back', editedAt: serverTimestamp(), ...stamp(VISHWAS) }))
+  })
+
+  it('keeps posts away from people outside the household', async () => {
+    await setDoc(ref(VISHWAS), post(VISHWAS))
+    const s = db(STRANGER, 'stranger@example.com')
+    await assertFails(getDoc(doc(s, 'households', HID, 'whiteboardPosts', 'p1')))
+    await assertFails(getDocs(collection(s, 'households', HID, 'whiteboardPosts')))
+    await assertFails(setDoc(doc(s, 'households', HID, 'whiteboardPosts', 'x'), post(STRANGER)))
   })
 })

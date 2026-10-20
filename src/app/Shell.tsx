@@ -1,9 +1,13 @@
-import { CalendarDays, CalendarHeart, ListChecks, ListTodo, Settings as SettingsIcon, Sun } from 'lucide-react'
+import { CalendarDays, CalendarHeart, ListChecks, ListTodo, MessagesSquare, Settings as SettingsIcon, Sun } from 'lucide-react'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { SyncStatus, Toasts } from '../components/bits'
 import { Wordmark } from '../components/ui'
 import { Calendar } from '../screens/Calendar'
 import { Lists } from '../screens/Lists'
+import { Whiteboard } from '../screens/Whiteboard'
+import { useRecentPosts, useWhiteboardSeen } from '../data/whiteboard'
+import { unreadCount } from '../domain/whiteboard'
+import { useHousehold } from './household'
 import { Settings } from '../screens/Settings'
 import { Tasks } from '../screens/Tasks'
 import { Today } from '../screens/Today'
@@ -15,12 +19,31 @@ const TABS = [
   { to: '/', label: 'Today', icon: Sun, end: true, phone: true },
   { to: '/week', label: 'Week', icon: CalendarDays, end: false, phone: true },
   { to: '/lists', label: 'Lists', icon: ListTodo, end: false, phone: true },
+  { to: '/whiteboard', label: 'Whiteboard', icon: MessagesSquare, end: false, phone: true },
   { to: '/tasks', label: 'Tasks', icon: ListChecks, end: false, phone: false },
   { to: '/calendar', label: 'Calendar', icon: CalendarHeart, end: false, phone: true },
   { to: '/settings', label: 'Settings', icon: SettingsIcon, end: false, phone: false },
 ]
 
+/** Messages from your partner since this device last opened the whiteboard. */
+function useUnread() {
+  const { household, user } = useHousehold()
+  const recent = useRecentPosts(household.id, 20)
+  const seen = useWhiteboardSeen()
+  return unreadCount(recent.data, user.uid, seen)
+}
+
+function Badge({ count }: { count: number }) {
+  if (!count) return null
+  return (
+    <span aria-hidden className="absolute -top-1 left-1/2 ml-1.5 min-w-4 rounded-full bg-garima-ink px-1 text-center text-[10px] leading-4 font-semibold text-canvas">
+      {count > 9 ? '9+' : count}
+    </span>
+  )
+}
+
 export function Shell() {
+  const unread = useUnread()
   return (
     <div className="mx-auto min-h-dvh max-w-6xl lg:flex">
       {/* Desktop sidebar */}
@@ -31,11 +54,15 @@ export function Shell() {
             key={to}
             to={to}
             end={end}
+            aria-label={to === '/whiteboard' && unread ? `${label}, ${unread} unread` : undefined}
             className={({ isActive }) =>
               `flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition ${isActive ? 'bg-surface text-ink shadow-sm ring-1 ring-line' : 'text-ink-muted hover:text-ink'}`
             }
           >
-            <Icon size={19} aria-hidden />
+            <span className="relative">
+              <Icon size={19} aria-hidden />
+              {to === '/whiteboard' && <Badge count={unread} />}
+            </span>
             {label}
           </NavLink>
         ))}
@@ -63,6 +90,7 @@ export function Shell() {
             <Route path="/week" element={<Week />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/lists/:listId?" element={<Lists />} />
+            <Route path="/whiteboard" element={<Whiteboard />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/settings/*" element={<Settings />} />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -83,11 +111,15 @@ export function Shell() {
               key={to}
               to={to}
               end={end}
+              aria-label={to === '/whiteboard' && unread ? `${label}, ${unread} unread` : undefined}
               className={({ isActive }) =>
                 `flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition ${isActive ? 'text-ink' : 'text-ink-muted'}`
               }
             >
-              <Icon size={22} strokeWidth={1.8} aria-hidden />
+              <span className="relative">
+                <Icon size={22} strokeWidth={1.8} aria-hidden />
+                {to === '/whiteboard' && <Badge count={unread} />}
+              </span>
               {label}
             </NavLink>
           ))}
