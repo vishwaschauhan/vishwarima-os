@@ -23,7 +23,7 @@ billing account, Cloud Functions or Cloud Storage.
 | Offline use with pending-sync indicator | Done |
 | Design pass: Inter and Newsreader fonts, light/dark/system theme, portrait greeting, sheet animation | Done |
 | Install to the home screen (PWA manifest, app icon, offline app shell) | Done |
-| Deploy to Firebase Hosting | Next |
+| Deploy to Firebase Hosting, automatic deploys on merge | Done |
 
 ## Project layout
 
@@ -106,6 +106,20 @@ npm run deploy                  # builds, then deploys Hosting and the Firestore
 ```
 
 The app is then live at `https://<project-id>.web.app`.
+
+### Automatic deploys
+
+Once set up, every merge to `main` deploys itself after CI passes (the `deploy` job in
+`.github/workflows/ci.yml`). One-time setup:
+
+1. [Google Cloud console → IAM → Service accounts](https://console.cloud.google.com/iam-admin/serviceaccounts?project=vishwarima-os)
+   → **Create service account**, named `github-deploy`.
+2. Grant it the roles **Firebase Admin** and **Service Usage Consumer**, then **Done**.
+3. Open the account → **Keys → Add key → Create new key → JSON**. A file downloads.
+4. GitHub repository → **Settings → Secrets and variables → Actions → New repository secret**.
+   Name it `FIREBASE_SERVICE_ACCOUNT` and paste the whole JSON file. Then delete the downloaded file.
+
+Without the secret the deploy job is skipped with a warning.
 
 ## Household onboarding
 
