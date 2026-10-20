@@ -7,6 +7,7 @@ import {
   signOut,
   type User,
 } from 'firebase/auth'
+import { clearIndexedDbPersistence, terminate } from 'firebase/firestore'
 import { firebase } from './firebase'
 
 export async function signInWithGoogle(): Promise<void> {
@@ -27,6 +28,14 @@ export async function resendVerification(user: User): Promise<void> {
   await sendEmailVerification(user)
 }
 
+/** Sign out and wipe this device's offline copy of the household, then start fresh. */
 export async function signOutUser(): Promise<void> {
-  await signOut(firebase().auth)
+  const { auth, db } = firebase()
+  await signOut(auth)
+  try {
+    await terminate(db)
+    await clearIndexedDbPersistence(db)
+  } finally {
+    window.location.assign('/')
+  }
 }

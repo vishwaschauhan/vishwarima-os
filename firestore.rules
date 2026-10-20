@@ -114,10 +114,10 @@ service cloud.firestore {
 
       // Admins manage settings and switch the active plan version (which must exist).
       allow update: if isAdmin(hid)
-        && changed().hasOnly(['name', 'timezone', 'activePlanVersion', 'firstUseDate', 'updatedAt', 'updatedBy'])
+        && changed().hasOnly(['name', 'timezone', 'activePlanVersion', 'updatedAt', 'updatedBy'])
         && stampedByMe()
         && (!('activePlanVersion' in changed())
-            || exists(/databases/$(database)/documents/households/$(hid)/planVersions/$(incoming().activePlanVersion)));
+            || existsAfter(/databases/$(database)/documents/households/$(hid)/planVersions/$(incoming().activePlanVersion)));
 
       // Any member may record the first day the app was used, once.
       allow update: if isMember(hid)

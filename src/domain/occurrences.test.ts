@@ -129,6 +129,18 @@ describe('plan versions', () => {
     ])
     expect(diffPlans(v1.plan, v2.plan).removed.map((t) => t.id)).toEqual(['car-wash'])
   })
+
+  it('lets a newer version with an earlier effective date replace an older one', () => {
+    const noCar = structuredClone(v1.plan)
+    noCar.frontmatter.tasks = noCar.frontmatter.tasks.filter((t) => t.id !== 'car-wash')
+    const v2: PlanVersion = { id: 'v2', effectiveFrom: '2026-10-30', plan: noCar }
+    const v3: PlanVersion = { id: 'v3', effectiveFrom: '2026-10-26', plan: v1.plan }
+    const occ = generateOccurrences([v1, v3, v2], PILOT_START, PILOT_END)
+    expect(occ.filter((o) => o.taskId === 'car-wash').map((o) => [o.date, o.planVersionId])).toEqual([
+      ['2026-10-23', 'v1'],
+      ['2026-10-30', 'v3'],
+    ])
+  })
 })
 
 describe('dates', () => {

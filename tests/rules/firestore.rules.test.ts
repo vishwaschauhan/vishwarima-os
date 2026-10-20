@@ -398,3 +398,103 @@ describe('private busy blocks', () => {
     )
   })
 })
+
+describe('core app writes', () => {
+  beforeEach(async () => {
+    await foundHousehold()
+    await inviteGarima()
+    await garimaJoins()
+  })
+
+  it('applies a new plan version and switches to it in one batch', async () => {
+    const v = db(VISHWAS)
+    const batch = writeBatch(v)
+    batch.set(doc(v, 'households', HID, 'planVersions', 'v2'), {
+      markdown: '---\nschemaVersion: 1\n---\n',
+      effectiveFrom: '2026-10-26',
+      note: 'Swap baths',
+      authorUid: VISHWAS,
+      createdAt: serverTimestamp(),
+    })
+    batch.update(doc(v, 'households', HID), { activePlanVersion: 'v2', ...stamp(VISHWAS) })
+    await assertSucceeds(batch.commit())
+  })
+
+  it('refuses to overwrite an existing plan version when two people apply at once', async () => {
+    const g = db(GARIMA, GARIMA_EMAIL)
+    await assertFails(
+      setDoc(doc(g, 'households', HID, 'planVersions', 'v1'), {
+        markdown: 'x',
+        effectiveFrom: '2026-10-26',
+        authorUid: GARIMA,
+        createdAt: serverTimestamp(),
+      }),
+    )
+  })
+
+  it('records the first day of use only once', async () => {
+    const g = db(GARIMA, GARIMA_EMAIL)
+    await assertSucceeds(updateDoc(doc(g, 'households', HID), { firstUseDate: '2026-10-20', ...stamp(GARIMA) }))
+    await assertFails(updateDoc(doc(g, 'households', HID), { firstUseDate: '2026-10-19', ...stamp(GARIMA) }))
+  })
+
+  it('reassigns one occurrence with the assigner recorded, and rejects a forged assigner', async () => {
+    const g = db(GARIMA, GARIMA_EMAIL)
+    const ref = doc(g, 'households', HID, 'taskOverrides', 'car-wash_2026-10-23_0')
+    await assertFails(setDoc(ref, { taskId: 'car-wash', date: '2026-10-23', owner: 'garima', assignedBy: VISHWAS, ...stamp(GARIMA) }))
+    await assertSucceeds(setDoc(ref, { taskId: 'car-wash', date: '2026-10-23', owner: 'garima', assignedBy: GARIMA, ...stamp(GARIMA) }))
+  })
+
+  it('lets the partner tick a subtask without un-completing the task', async () => {
+    const key = 'weekly-family-reset_2026-10-25_0'
+    await setDoc(doc(db(VISHWAS), 'households', HID, 'taskStates', key), {
+      taskId: 'weekly-family-reset',
+      date: '2026-10-25',
+      completed: true,
+      completedBy: VISHWAS,
+      completedAt: serverTimestamp(),
+      ...stamp(VISHWAS),
+    })
+    await assertSucceeds(
+      setDoc(
+        doc(db(GARIMA, GARIMA_EMAIL), 'households', HID, 'taskStates', key),
+        { subtasks: { 'vyomika-supplies': { done: true, by: GARIMA } }, ...stamp(GARIMA) },
+        { merge: true },
+      ),
+    )
+  })
+
+  it('stores a weekly private busy block with only "Busy" shared', async () => {
+    const g = db(GARIMA, GARIMA_EMAIL)
+    const batch = writeBatch(g)
+    batch.set(doc(g, 'households', HID, 'events', 'gym'), {
+      title: 'Busy',
+      type: 'busy',
+      date: '2026-10-20',
+      start: '17:30',
+      end: '19:00',
+      participants: ['garima'],
+      busy: true,
+      visibility: 'private',
+      coverage: null,
+      recurrence: { type: 'weekly', days: ['tue'], until: null },
+      recurring: true,
+      ownerUid: GARIMA,
+      createdBy: GARIMA,
+      createdAt: serverTimestamp(),
+      ...stamp(GARIMA),
+    })
+    batch.set(doc(g, 'households', HID, 'privateEventDetails', 'gym'), {
+      ownerUid: GARIMA,
+      title: 'Gym',
+      notes: '',
+      location: '',
+      ...stamp(GARIMA),
+    })
+    await assertSucceeds(batch.commit())
+    const v = db(VISHWAS)
+    await assertSucceeds(getDocs(query(collection(v, 'households', HID, 'events'), where('recurring', '==', true))))
+    await assertSucceeds(getDocs(query(collection(v, 'households', HID, 'privateEventDetails'), where('ownerUid', '==', VISHWAS))))
+    await assertFails(getDocs(query(collection(v, 'households', HID, 'privateEventDetails'), where('ownerUid', '==', GARIMA))))
+  })
+})
