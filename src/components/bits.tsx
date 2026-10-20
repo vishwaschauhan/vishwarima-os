@@ -50,11 +50,12 @@ export function Segmented<T extends string>({
 export function OwnerFilterBar({ value, onChange, myId }: { value: OwnerFilter; onChange: (v: OwnerFilter) => void; myId?: PersonId }) {
   const options: { value: OwnerFilter; label: string }[] = [
     { value: 'everyone', label: 'Everyone' },
-    ...(myId ? [{ value: 'mine' as const, label: 'Mine' }] : []),
     { value: 'vishwas', label: 'Vishwas' },
     { value: 'garima', label: 'Garima' },
   ]
-  return <Segmented label="Show tasks for" value={value} options={options} onChange={onChange} />
+  // Your own name is "mine"; a saved 'mine' filter shows as your name.
+  const shown = value === 'mine' ? (myId ?? 'everyone') : value
+  return <Segmented label="Show tasks for" value={shown} options={options} onChange={onChange} />
 }
 
 export function IconButton({ label, children, onClick }: { label: string; children: ReactNode; onClick: () => void }) {
