@@ -225,6 +225,23 @@ bucket, including the default one ([Firebase FAQ](https://firebase.google.com/do
 To stay entirely on the free Spark plan, share photos and documents as links (Google Photos,
 Google Drive) in a message. Uploads can be added later if billing is enabled.
 
+## iPhone Home Screen shortcuts
+
+iPhone widgets need a native App Store app, so VishwarimaOS uses a **Shortcuts** widget instead: buttons
+that open the app straight to a screen or a quick add. Every screen has its own link, and adding
+`?add=` opens a quick add on arrival (the parameter is removed once handled):
+
+| Link | Opens |
+| --- | --- |
+| `https://vishwarima-os.web.app/?add=voice` | Voice Quick Add |
+| `https://vishwarima-os.web.app/lists/groceries?add=voice` | Voice Quick Add, defaulting to Groceries |
+| `https://vishwarima-os.web.app/?add=task` / `?add=event` / `?add=item` | New task / event / shopping item |
+| `https://vishwarima-os.web.app/?add=menu` | The **+ Add** menu |
+| `https://vishwarima-os.web.app/lists/groceries`, `/whiteboard`, `/week` | That screen |
+
+Setup: Shortcuts app → **+** → Add Action → **Open URLs** → paste a link → name it. Then long-press the
+Home Screen → Edit → Add Widget → Shortcuts. iOS opens these links in Safari, so sign in once there too.
+
 ## Voice Quick Add
 
 Tap the microphone (on Today, Calendar, beside a list's add field, or **+ → Speak it**), say what
