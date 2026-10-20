@@ -30,7 +30,7 @@ test('a task crossed off on one phone is crossed off on the other', async ({ bro
 test('a private gym block shows as busy, and overlapping plans warn about the kids', async ({ browser }) => {
   const { v, g } = await household(browser)
   await g.goto('/?d=2026-10-20')
-  await g.getByRole('button', { name: 'Busy time' }).click()
+  await g.getByRole('button', { name: 'Busy', exact: true }).click()
   const sheet = g.getByRole('dialog')
   await sheet.getByRole('radio', { name: 'Just “Busy”' }).click()
   await sheet.getByLabel('Title (only you see this)').fill('Gym')

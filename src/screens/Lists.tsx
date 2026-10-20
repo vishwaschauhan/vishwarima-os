@@ -8,6 +8,7 @@ import { ConfirmButton, Empty, OwnerFilterBar, Segmented, Skeleton } from '../co
 import { ListItemRow } from '../components/ListItemRow'
 import { ListItemSheet, type ItemSheetMode } from '../components/ListItemSheet'
 import { ManageListsSheet } from '../components/ManageListsSheet'
+import { MicButton } from '../components/AddMenu'
 import { Sheet } from '../components/bits'
 import { clearCompleted, createItem, restoreItem, swapOrder, useClearedItems } from '../data/lists'
 import {
@@ -314,6 +315,7 @@ function QuickAddItem({ list }: { list: ListDef }) {
         placeholder={shopping ? `Add to ${list.title} (e.g. Milk x2)` : `Add a to-do to ${list.title}`}
         className="min-h-10 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-ink-muted/70"
       />
+      {!text.trim() && <MicButton compact listId={list.id} />}
       <button
         type="submit"
         aria-label="Add"

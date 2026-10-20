@@ -37,3 +37,14 @@ export function useToasts() {
     () => messages,
   )
 }
+
+/** A short confirmation, e.g. after a voice command is saved. */
+export function notify(text: string) {
+  const id = nextId++
+  messages = [...messages, { id, text }]
+  emit()
+  setTimeout(() => {
+    messages = messages.filter((m) => m.id !== id)
+    emit()
+  }, 3500)
+}

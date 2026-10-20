@@ -8,6 +8,7 @@ import { DayAgenda } from '../components/DayAgenda'
 import { EventSheet, type EventSheetMode } from '../components/EventSheet'
 import { TaskSheet, type TaskSheetMode } from '../components/TaskSheet'
 import { ErrorText, Portrait } from '../components/ui'
+import { MicButton } from '../components/AddMenu'
 import { dayProgress, type OwnerFilter } from '../domain/agenda'
 import { addDays, isLocalDate } from '../domain/dates'
 import { longDate } from '../lib/format'
@@ -64,10 +65,11 @@ export function Today() {
         <OwnerFilterBar value={filter} onChange={setFilter} myId={myId} />
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-4 gap-2">
         <QuickAdd icon={<ListPlus size={18} />} label="Task" onClick={() => setTaskSheet({ kind: 'new', date })} />
         <QuickAdd icon={<CalendarPlus size={18} />} label="Event" onClick={() => setEventSheet({ kind: 'new', date })} />
-        <QuickAdd icon={<CircleSlash size={18} />} label="Busy time" onClick={() => setEventSheet({ kind: 'new', date, busy: true })} />
+        <QuickAdd icon={<CircleSlash size={18} />} label="Busy" onClick={() => setEventSheet({ kind: 'new', date, busy: true })} />
+        <MicButton />
       </div>
 
       <div className="mt-5">
@@ -120,7 +122,7 @@ export function QuickAdd({ icon, label, onClick }: { icon: React.ReactNode; labe
   return (
     <button
       onClick={onClick}
-      className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-line bg-surface text-[14px] font-medium transition hover:border-ink-muted"
+      className="flex min-h-12 items-center justify-center gap-1.5 rounded-2xl border border-line bg-surface px-1 text-[14px] font-medium transition hover:border-ink-muted"
     >
       <span className="text-ink-muted" aria-hidden>
         {icon}
