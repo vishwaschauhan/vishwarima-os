@@ -21,7 +21,9 @@ billing account, Cloud Functions or Cloud Storage.
 | Family Calendar: events and busy blocks, private "Busy" blocks, childcare coverage, overlap warnings | Done |
 | Settings: plan download, upload, preview and apply; cleaning-team setup; pilot review; activity; JSON export | Done |
 | Offline use with pending-sync indicator | Done |
-| Full visual design pass, PWA install, app icon | Next |
+| Design pass: Inter and Newsreader fonts, light/dark/system theme, portrait greeting, sheet animation | Done |
+| Install to the home screen (PWA manifest, app icon, offline app shell) | Done |
+| Deploy to Firebase Hosting | Next |
 
 ## Project layout
 
@@ -34,8 +36,9 @@ src/screens/                 Screens
 firestore.rules              Security rules
 tests/rules/                 Security rules tests (Firestore emulator)
 tests/e2e/                   Playwright tests (Auth + Firestore emulators)
-brand/                       Original family portrait (not served)
+brand/                       Original family portrait and app icon source (not served)
 public/brand/                Optimized portrait sizes served by the app
+public/icons/                App icons rendered from brand/icon.svg (scripts/render-icons.mjs)
 ```
 
 ## Develop locally
@@ -59,6 +62,23 @@ npm run test:e2e           # two-person sign-up and invite in a mobile browser
 npm run build
 ```
 
+To review the design, save phone screenshots of every screen in light and dark mode:
+
+```sh
+SCREENSHOT_DIR=$PWD/screens npm run test:e2e -- screens
+```
+
+## Install on a phone
+
+The app is a Progressive Web App. On iPhone, open it in Safari, tap **Share → Add to Home Screen**.
+On Android, open it in Chrome and tap **Install app**. It then opens full screen with its own icon.
+
+The service worker caches only the app's own files, so it opens instantly and offline. Household
+data is never cached by it; Firestore's offline cache handles that. A new version installs itself
+in the background and applies the next time the app is opened.
+
+After changing `brand/icon.svg`, run `node scripts/render-icons.mjs` to regenerate the PNG icons.
+
 ## Firebase setup (one time)
 
 1. In the [Firebase console](https://console.firebase.google.com), **Create a project**
@@ -67,8 +87,9 @@ npm run build
 3. **Build → Firestore Database → Create database.** Choose a location (for example
    `us-central1`; it cannot be changed later) and **production mode**.
 4. **Project overview → Add app → Web.** Register the app and copy its `firebaseConfig`.
-5. Copy `.env.example` to `.env` and fill in the values from `firebaseConfig`. These identify
-   the project; they are not secrets. Access is enforced by `firestore.rules`.
+5. `npm run build` reads the web config from `.env.production`, which is committed for the
+   `vishwarima-os` project. These values identify the project; they are not secrets. Access is
+   enforced by `firestore.rules`. For another project, edit `.env.production` (see `.env.example`).
 6. `.firebaserc` points at the `vishwarima-os` project; change it if you use another project ID.
 
 ### Authorized domains
