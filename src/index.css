@@ -2,8 +2,8 @@
 
 /* Design tokens. Pastels are surfaces only; text on them uses the deeper `-ink` tones. */
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
 
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
@@ -39,8 +39,9 @@
   color-scheme: light;
 }
 
+/* Dark theme: follows the phone unless a theme is chosen in Settings (data-theme on <html>). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --canvas: #1c1b1a;
     --surface: #262524;
     --ink: #f3f1ec;
@@ -59,6 +60,24 @@
   }
 }
 
+:root[data-theme='dark'] {
+  --canvas: #1c1b1a;
+  --surface: #262524;
+  --ink: #f3f1ec;
+  --ink-muted: #a8a39c;
+  --line: #3a3836;
+  --vishwas: #233547;
+  --vishwas-ink: #b7d6f3;
+  --garima: #45293a;
+  --garima-ink: #f2c1d2;
+  --shared: #352d47;
+  --shared-ink: #d6c9ef;
+  --sage: #273a2c;
+  --sage-ink: #bfdcc5;
+  --danger: #f0a090;
+  color-scheme: dark;
+}
+
 html,
 body {
   background: var(--canvas);
@@ -70,6 +89,30 @@ body {
 body {
   min-height: 100dvh;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Bottom sheets slide up on phones and fade in on larger screens. */
+dialog.sheet[open] {
+  animation: sheet-up 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+dialog.sheet[open]::backdrop {
+  animation: fade-in 200ms ease-out;
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(24%);
+    opacity: 0.4;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (min-width: 640px) {
+  dialog.sheet[open] {
+    animation-name: fade-in;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

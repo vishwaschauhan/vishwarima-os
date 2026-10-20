@@ -100,7 +100,7 @@ export function Week() {
 
       {/* Phones: a date strip plus the selected day's agenda. */}
       <div className="-mx-5 mt-4 overflow-x-auto px-5 lg:hidden">
-        <div className="flex gap-1.5" role="tablist" aria-label="Days">
+        <div className="flex gap-1" role="tablist" aria-label="Days">
           {days.map((d) => {
             const p = dayProgress(tasks, d)
             const hasGap = coverageGaps(instances.filter((i) => i.date === d)).length > 0
@@ -112,7 +112,7 @@ export function Week() {
                 aria-selected={isSel}
                 aria-label={longDate(d, timezone)}
                 onClick={() => select(d)}
-                className={`flex min-w-[46px] flex-1 flex-col items-center rounded-2xl py-2 transition ${
+                className={`flex min-w-10 flex-1 flex-col items-center rounded-2xl py-2 transition ${
                   isSel ? 'bg-ink text-canvas' : d === today ? 'bg-surface ring-1 ring-ink/40' : 'bg-surface ring-1 ring-line'
                 }`}
               >

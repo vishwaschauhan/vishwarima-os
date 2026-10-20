@@ -7,16 +7,16 @@ import { OwnerFilterBar, SectionTitle, Skeleton, StepNav } from '../components/b
 import { DayAgenda } from '../components/DayAgenda'
 import { EventSheet, type EventSheetMode } from '../components/EventSheet'
 import { TaskSheet, type TaskSheetMode } from '../components/TaskSheet'
-import { ErrorText } from '../components/ui'
+import { ErrorText, Portrait } from '../components/ui'
 import { dayProgress, type OwnerFilter } from '../domain/agenda'
 import { addDays, isLocalDate } from '../domain/dates'
 import { longDate } from '../lib/format'
 import { friendlyError } from '../lib/errors'
 import { useStoredState } from '../app/useStoredState'
-
+import { useNow } from '../app/useNow'
 
 export function Today() {
-  const { today, timezone, myId } = useHousehold()
+  const { today, timezone, myId, me } = useHousehold()
   const [params, setParams] = useSearchParams()
   const date = isLocalDate(params.get('d') ?? '') ? params.get('d')! : today
   const setDate = (d: string) => setParams(d === today ? {} : { d }, { replace: true })
@@ -34,6 +34,7 @@ export function Today() {
 
   return (
     <div>
+      {date === today && <Hero name={me?.displayName} timezone={timezone} />}
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[13px] font-semibold tracking-wide text-ink-muted uppercase">{relative ?? longDate(date, timezone, { weekday: 'long' })}</p>
@@ -126,5 +127,21 @@ export function QuickAdd({ icon, label, onClick }: { icon: React.ReactNode; labe
       </span>
       {label}
     </button>
+  )
+}
+
+/** The family portrait as a short banner with a greeting. Cropped so all four faces stay in frame. */
+function Hero({ name, timezone }: { name: string | undefined; timezone: string }) {
+  const hour = Number(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hourCycle: 'h23', timeZone: timezone }).format(useNow()))
+  const part = hour < 5 ? 'evening' : hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'
+  return (
+    <div className="relative mb-5 overflow-hidden rounded-3xl bg-line/60 lg:hidden">
+      <Portrait className="aspect-[2/1] object-[50%_48%]" />
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-4 pt-10 pb-3">
+        <p className="font-serif text-[22px] leading-tight text-white">
+          Good {part}{name ? `, ${name}` : ''}
+        </p>
+      </div>
+    </div>
   )
 }

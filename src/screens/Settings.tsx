@@ -3,7 +3,8 @@ import { ChevronRight, Download, LogOut } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, Route, Routes } from 'react-router-dom'
 import { useHousehold } from '../app/household'
-import { OwnerBadge, SectionTitle } from '../components/bits'
+import { useTheme, type ThemeChoice } from '../app/theme'
+import { OwnerBadge, SectionTitle, Segmented } from '../components/bits'
 import { Button, Card, ErrorText, Field } from '../components/ui'
 import { createInvite, type PlanMemberId } from '../data/household'
 import { useActivity } from '../data/live'
@@ -78,6 +79,9 @@ function SettingsHome() {
       {me && <DisplayName current={me.displayName} />}
       {isAdmin && members.length < 2 && <InvitePartner />}
 
+      <SectionTitle>Appearance</SectionTitle>
+      <ThemePicker />
+
       <SectionTitle>Plan and review</SectionTitle>
       <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <Row to="/settings/plan" label="Family plan" detail={versions.at(-1)?.id} />
@@ -98,6 +102,17 @@ function SettingsHome() {
       </Card>
     </div>
   )
+}
+
+const THEMES: { value: ThemeChoice; label: string }[] = [
+  { value: 'system', label: 'Match phone' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+]
+
+function ThemePicker() {
+  const [theme, setTheme] = useTheme()
+  return <Segmented label="Theme" value={theme} options={THEMES} onChange={setTheme} />
 }
 
 function DisplayName({ current }: { current: string }) {
