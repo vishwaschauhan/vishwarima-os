@@ -46,7 +46,10 @@ test('a whiteboard message appears on the other phone and can be pinned, reacted
   await g.getByRole('button', { name: 'Turn into a to-do' }).click()
   await expect(g.getByRole('dialog').getByLabel('Name')).toHaveValue('Photo day moved to Monday')
   await g.getByRole('dialog').getByRole('button', { name: 'Add' }).click()
-  await g.goto('/lists/household')
+  await expect(g.getByRole('dialog')).toHaveCount(0)
+  // Navigate inside the app: a full reload right after Add can drop a write that hasn't reached the local cache yet.
+  await g.getByRole('link', { name: 'Lists', exact: true }).click()
+  await g.getByRole('link', { name: /^Household/ }).click()
   await expect(g.getByRole('checkbox', { name: /: Photo day moved to Monday$/ })).toBeVisible()
 
   // Delete with confirmation.
