@@ -217,6 +217,91 @@ service cloud.firestore {
         allow delete: if isMember(hid);
       }
 
+      // Shared to-do and shopping lists. Separate from the plan's recurring chores.
+      match /lists/{listId} {
+        function validList() {
+          return incoming().keys().hasOnly(['title', 'type', 'sortOrder', 'archived', 'createdBy', 'createdAt', 'updatedAt', 'updatedBy'])
+            && shortString(incoming().title, 60)
+            && incoming().type in ['todo', 'shopping']
+            && incoming().sortOrder is number
+            && incoming().archived is bool;
+        }
+
+        allow read: if isMember(hid);
+        allow create: if isMember(hid)
+          && validList()
+          && incoming().createdBy == uid()
+          && incoming().createdAt == request.time
+          && stampedByMe();
+        // Rename, reorder or archive; the type and creator never change.
+        allow update: if isMember(hid)
+          && validList()
+          && changed().hasOnly(['title', 'sortOrder', 'archived', 'updatedAt', 'updatedBy'])
+          && stampedByMe();
+        allow delete: if false;
+      }
+
+      match /listItems/{itemId} {
+        function optString(field, max) {
+          return incoming().get(field, null) == null
+            || (incoming()[field] is string && incoming()[field].size() <= max);
+        }
+
+        function optNumber(field, lo, hi) {
+          return incoming().get(field, null) == null
+            || (incoming()[field] is number && incoming()[field] >= lo && incoming()[field] <= hi);
+        }
+
+        function validItem() {
+          let d = incoming();
+          return d.keys().hasOnly(['listId', 'title', 'details', 'assignedTo', 'assignedBy', 'dueDate', 'priority',
+                 'quantity', 'unit', 'store', 'price', 'completed', 'completedBy', 'completedAt', 'archived',
+                 'archivedBy', 'archivedAt', 'sortOrder', 'convertedTaskId', 'createdBy', 'createdAt', 'updatedAt', 'updatedBy'])
+            && d.listId is string
+            && exists(/databases/$(database)/documents/households/$(hid)/lists/$(d.listId))
+            && shortString(d.title, 200)
+            && isOwnerId(d.assignedTo)
+            && (d.get('dueDate', null) == null || (d.dueDate is string && d.dueDate.matches('^\\d{4}-\\d{2}-\\d{2}$')))
+            && d.get('priority', 'normal') in ['low', 'normal', 'high']
+            && optString('details', 2000)
+            && optString('unit', 20)
+            && optString('store', 40)
+            && optNumber('quantity', 1, 999)
+            && optNumber('price', 0, 100000)
+            && d.completed is bool
+            && d.archived is bool
+            && d.sortOrder is number
+            // Completing stamps the completer; undoing clears it.
+            && (d.completed
+                ? (d.completedBy == uid() && d.completedAt == request.time)
+                  || (resource != null && resource.data.completed == true
+                      && d.completedBy == resource.data.completedBy
+                      && d.completedAt == resource.data.completedAt)
+                : d.get('completedBy', null) == null);
+        }
+
+        allow read: if isMember(hid);
+        allow create: if isMember(hid)
+          && validItem()
+          && incoming().completed == false
+          && incoming().archived == false
+          && incoming().createdBy == uid()
+          && incoming().assignedBy == uid()
+          && incoming().createdAt == request.time
+          && stampedByMe();
+        allow update: if isMember(hid)
+          && validItem()
+          && incoming().createdBy == resource.data.createdBy
+          && incoming().createdAt == resource.data.createdAt
+          // Reassigning records who did it.
+          && (!('assignedTo' in changed()) || incoming().assignedBy == uid())
+          && (!('assignedBy' in changed()) || incoming().assignedBy == uid())
+          // Clearing stamps who cleared it.
+          && (!('archivedBy' in changed()) || incoming().archivedBy == uid() || incoming().archivedBy == null)
+          && stampedByMe();
+        allow delete: if isMember(hid);
+      }
+
       // Shared event records. A private busy block carries only a generic title and
       // no details; the real title and notes live in privateEventDetails.
       match /events/{eventId} {

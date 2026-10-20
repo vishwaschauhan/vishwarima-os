@@ -24,6 +24,7 @@ billing account, Cloud Functions or Cloud Storage.
 | Design pass: Inter and Newsreader fonts, light/dark/system theme, portrait greeting, sheet animation | Done |
 | Install to the home screen (PWA manifest, app icon, offline app shell) | Done |
 | Deploy to Firebase Hosting, automatic deploys on merge | Done |
+| v2 · Shared lists: to-do and shopping lists with live check-off, assignment, due dates, quantities, filters, search, reorder, clear purchased (archived, can be put back) | Done |
 
 ## Project layout
 
@@ -153,6 +154,8 @@ All data lives under `households/{householdId}`:
 | `…/privateEventDetails/{eventId}` | real title and notes of a private block; owner-only |
 | `…/activity/{id}` | append-only change history |
 | `…/pilotReviews/{weekId}` | weekly review notes |
+| `…/lists/{listId}` | shared list: title, `todo` or `shopping`, order, archived |
+| `…/listItems/{itemId}` | list item: list, title, notes, assignee, due date, priority, quantity, unit, store, price, completed by/at, archived (cleared) |
 | `invites/{email}` | pending invite: household, plan identity, role |
 
 Recurring tasks are **generated on the device** for the dates being viewed. Firestore stores
@@ -173,6 +176,28 @@ November 1, 2026 DST change never moves a task to another day.
   or switch the active one, and the active version must exist.
 - A private busy block's shared record must be titled "Busy" with no notes or location. Its real
   details are in a separate document only the owner can read. Only the owner can edit or delete it.
+- List items must belong to an existing list of the household, can only be assigned to Vishwas,
+  Garima, both or anyone, and are checked off only in your own name. Field types and sizes are
+  checked; a list's type and an item's creator never change.
+
+## Shared lists
+
+The **Lists** tab holds to-do lists (Household, Errands, Kids) and shopping lists (Groceries,
+Costco, Sam’s Club), created once the first time either of you opens it. Add, rename, reorder and
+archive lists under **Manage lists**; archiving keeps every item.
+
+- Type an item and press Enter to add the next one. On a shopping list, `Milk x2` sets the
+  quantity; the − / + buttons change it later.
+- Tap an item to edit its assignee, due date, priority, quantity, unit, store, estimated price
+  and notes, move it to another list, or delete it (asks twice).
+- Checking an item off records who did it and when. **Clear purchased** / **Clear completed**
+  archives finished items rather than deleting them; **Cleared items** shows them and puts one back.
+- A to-do with a due date shows on that day under *From your lists* in Today and Week for whoever
+  it's assigned to (overdue ones stay on today). Undated items stay in Lists.
+- **Move to the calendar as a task** turns a dated to-do into an app task and archives the list
+  item in the same write, so it is never in both places.
+
+List items live in Firestore only. The Markdown family plan never reads or overwrites them.
 
 ## How changes are saved
 

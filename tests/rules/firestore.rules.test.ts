@@ -498,3 +498,128 @@ describe('core app writes', () => {
     await assertFails(getDocs(query(collection(v, 'households', HID, 'privateEventDetails'), where('ownerUid', '==', GARIMA))))
   })
 })
+
+describe('shared lists', () => {
+  beforeEach(async () => {
+    await foundHousehold()
+    await inviteGarima()
+    await garimaJoins()
+    await setDoc(doc(db(VISHWAS), 'households', HID, 'lists', 'groceries'), groceries())
+  })
+
+  const groceries = () => ({
+    title: 'Groceries',
+    type: 'shopping',
+    sortOrder: 0,
+    archived: false,
+    createdBy: VISHWAS,
+    createdAt: serverTimestamp(),
+    ...stamp(VISHWAS),
+  })
+
+  const milk = (uid: string, extra: Record<string, unknown> = {}) => ({
+    listId: 'groceries',
+    title: 'Buy milk',
+    details: null,
+    assignedTo: 'unassigned',
+    assignedBy: uid,
+    dueDate: null,
+    priority: 'normal',
+    quantity: 2,
+    unit: 'cartons',
+    store: null,
+    price: null,
+    completed: false,
+    completedBy: null,
+    completedAt: null,
+    archived: false,
+    sortOrder: 1,
+    createdBy: uid,
+    createdAt: serverTimestamp(),
+    ...stamp(uid),
+    ...extra,
+  })
+
+  const item = (uid: string, id = 'milk') => doc(db(uid, uid === GARIMA ? GARIMA_EMAIL : undefined), 'households', HID, 'listItems', id)
+
+  it('lets one of you add an item and the other check it off in their own name', async () => {
+    await assertSucceeds(setDoc(item(VISHWAS), milk(VISHWAS)))
+    await assertSucceeds(getDoc(item(GARIMA)))
+    await assertSucceeds(
+      updateDoc(item(GARIMA), { completed: true, completedBy: GARIMA, completedAt: serverTimestamp(), ...stamp(GARIMA) }),
+    )
+    // Undo by either of you clears the completer.
+    await assertSucceeds(updateDoc(item(VISHWAS), { completed: false, completedBy: null, completedAt: null, ...stamp(VISHWAS) }))
+  })
+
+  it('rejects checking off an item in the partner’s name', async () => {
+    await setDoc(item(VISHWAS), milk(VISHWAS))
+    await assertFails(
+      updateDoc(item(VISHWAS), { completed: true, completedBy: GARIMA, completedAt: serverTimestamp(), ...stamp(VISHWAS) }),
+    )
+  })
+
+  it('records who reassigned an item and only to a household member', async () => {
+    await setDoc(item(GARIMA), milk(GARIMA, { assignedTo: 'vishwas' }))
+    await assertSucceeds(updateDoc(item(VISHWAS), { assignedTo: 'garima', assignedBy: VISHWAS, ...stamp(VISHWAS) }))
+    await assertFails(updateDoc(item(VISHWAS), { assignedTo: 'vishwas', assignedBy: GARIMA, ...stamp(VISHWAS) }))
+    await assertFails(updateDoc(item(VISHWAS), { assignedTo: 'grandma', assignedBy: VISHWAS, ...stamp(VISHWAS) }))
+  })
+
+  it('validates item fields and keeps the creator fixed', async () => {
+    await assertFails(setDoc(item(VISHWAS, 'a'), milk(VISHWAS, { listId: 'no-such-list' })))
+    await assertFails(setDoc(item(VISHWAS, 'b'), milk(VISHWAS, { quantity: 0 })))
+    await assertFails(setDoc(item(VISHWAS, 'c'), milk(VISHWAS, { dueDate: 'Friday' })))
+    await assertFails(setDoc(item(VISHWAS, 'd'), milk(VISHWAS, { createdBy: GARIMA })))
+    await assertFails(setDoc(item(VISHWAS, 'e'), milk(VISHWAS, { photo: 'data:image/png;base64,AAAA' })))
+    await assertFails(setDoc(item(VISHWAS, 'f'), milk(VISHWAS, { completed: true, completedBy: VISHWAS, completedAt: serverTimestamp() })))
+    await setDoc(item(VISHWAS), milk(VISHWAS))
+    await assertFails(updateDoc(item(GARIMA), { createdBy: GARIMA, ...stamp(GARIMA) }))
+  })
+
+  it('clears purchased items by archiving them with who cleared them', async () => {
+    await setDoc(item(VISHWAS), milk(VISHWAS))
+    await assertSucceeds(updateDoc(item(GARIMA), { archived: true, archivedBy: GARIMA, archivedAt: serverTimestamp(), ...stamp(GARIMA) }))
+    await assertSucceeds(
+      getDocs(query(collection(db(VISHWAS), 'households', HID, 'listItems'), where('listId', '==', 'groceries'), where('archived', '==', true))),
+    )
+  })
+
+  it('lets members rename, reorder and archive lists but not change their type', async () => {
+    const list = doc(db(GARIMA, GARIMA_EMAIL), 'households', HID, 'lists', 'groceries')
+    await assertSucceeds(updateDoc(list, { title: 'Weekly groceries', sortOrder: 3, ...stamp(GARIMA) }))
+    await assertSucceeds(updateDoc(list, { archived: true, ...stamp(GARIMA) }))
+    await assertFails(updateDoc(list, { type: 'todo', ...stamp(GARIMA) }))
+    await assertFails(deleteDoc(list))
+  })
+
+  it('keeps lists and items away from people outside the household', async () => {
+    await setDoc(item(VISHWAS), milk(VISHWAS))
+    const s = db(STRANGER, 'stranger@example.com')
+    // The stranger has a household of their own; that grants nothing here.
+    await setDoc(doc(s, 'households', 'other'), {
+      name: 'Other',
+      timezone: 'America/Chicago',
+      ownerUid: STRANGER,
+      adminUids: [STRANGER],
+      memberUids: [STRANGER],
+      activePlanVersion: 'v1',
+      createdAt: serverTimestamp(),
+      ...stamp(STRANGER),
+    })
+    await assertFails(getDocs(collection(s, 'households', HID, 'lists')))
+    await assertFails(getDoc(doc(s, 'households', HID, 'listItems', 'milk')))
+    await assertFails(setDoc(doc(s, 'households', HID, 'listItems', 'x'), milk(STRANGER)))
+    await assertFails(updateDoc(doc(s, 'households', HID, 'listItems', 'milk'), { title: 'Hacked', ...stamp(STRANGER) }))
+    await assertFails(deleteDoc(doc(s, 'households', HID, 'listItems', 'milk')))
+    const anon = env.unauthenticatedContext().firestore() as unknown as Firestore
+    await assertFails(getDocs(collection(anon, 'households', HID, 'listItems')))
+  })
+
+  it('creates the starter lists only once', async () => {
+    const v = db(VISHWAS)
+    await assertSucceeds(setDoc(doc(v, 'households', HID, 'lists', 'kids'), { ...groceries(), title: 'Kids', type: 'todo' }))
+    // A second create of the same list would be an update that rewrites its creator.
+    await assertFails(setDoc(doc(db(GARIMA, GARIMA_EMAIL), 'households', HID, 'lists', 'kids'), { ...groceries(), title: 'Kids', type: 'todo', createdBy: GARIMA, ...stamp(GARIMA) }))
+  })
+})

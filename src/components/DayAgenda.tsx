@@ -1,4 +1,5 @@
 import { TriangleAlert } from 'lucide-react'
+import { useState } from 'react'
 import { useHousehold } from '../app/household'
 import {
   coverageGaps,
@@ -12,10 +13,13 @@ import {
   type OwnerFilter,
 } from '../domain/agenda'
 import { localDateAt, minutesOfDay } from '../domain/dates'
+import { itemsForDay, sortItems } from '../domain/lists'
 import { sortMinutes } from '../domain/occurrences'
 import { Empty, SectionTitle } from './bits'
 import { EventRow } from './EventRow'
 import { useEventTitle } from './eventLabels'
+import { ListItemRow } from './ListItemRow'
+import { ListItemSheet, type ItemSheetMode } from './ListItemSheet'
 import { TaskRow } from './TaskRow'
 
 export type KindFilter = 'all' | 'tasks' | 'events'
@@ -47,8 +51,9 @@ export function DayAgenda({
   onEditTask: (t: AgendaTask) => void
   onOpenEvent: (e: FamilyEvent) => void
 }) {
-  const { myId, timezone, today } = useHousehold()
+  const { myId, timezone, today, listItems, lists } = useHousehold()
   const eventTitle = useEventTitle()
+  const [itemSheet, setItemSheet] = useState<ItemSheetMode | null>(null)
   const kind = filters.kind ?? 'all'
   const status = filters.status ?? 'all'
 
@@ -63,6 +68,18 @@ export function DayAgenda({
   const dayEvents = allDayEvents.filter((i) => kind !== 'tasks' && status !== 'done' && eventMatchesOwner(i.event, filters.owner, myId))
   // Finished to-dos stay visible (crossed off) for the rest of the day they were done.
   const todo = undated.filter((t) => (!t.completed || (t.state?.completedAt && localDateAt(t.state.completedAt, timezone) === today)) && kind !== 'events' && matchesOwner(t.occ.owner, filters.owner, myId) && (status === 'all' || (status === 'done' ? t.completed : !t.completed)))
+
+  // Dated list items for this day (plus overdue ones on today). Undated items stay in Lists.
+  const listById = new Map(lists.map((l) => [l.id, l]))
+  const dayItems = sortItems(
+    itemsForDay(listItems, date, today).filter(
+      (i) =>
+        kind !== 'events' &&
+        matchesOwner(i.assignedTo, filters.owner, myId) &&
+        (status === 'all' || (status === 'done' ? i.completed : !i.completed)),
+    ),
+    'priority',
+  )
 
   const timed: Entry[] = [
     ...dayTasks.filter((t) => t.occ.time).map((t) => ({ at: sortMinutes(t.occ.time)!, task: t })),
@@ -91,7 +108,7 @@ export function DayAgenda({
         </div>
       )}
 
-      {timed.length === 0 && unscheduled.length === 0 && <Empty>Nothing here. Enjoy the space.</Empty>}
+      {timed.length === 0 && unscheduled.length === 0 && dayItems.length === 0 && <Empty>Nothing here. Enjoy the space.</Empty>}
 
       <ul className="space-y-2">
         {timed.map((e) => (
@@ -117,6 +134,25 @@ export function DayAgenda({
           </ul>
         </>
       )}
+
+      {dayItems.length > 0 && (
+        <>
+          <SectionTitle>From your lists</SectionTitle>
+          <ul className="space-y-2">
+            {dayItems.map((i) => (
+              <li key={i.id}>
+                <ListItemRow
+                  item={i}
+                  shopping={listById.get(i.listId)?.type === 'shopping'}
+                  listName={listById.get(i.listId)?.title}
+                  onEdit={(item) => setItemSheet({ kind: 'edit', item })}
+                />
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <ListItemSheet mode={itemSheet} onClose={() => setItemSheet(null)} />
 
       {todo.length > 0 && (
         <>
