@@ -173,7 +173,7 @@ export function Week() {
                   <li key={`${i.event.id}-${d}`}>
                     <button
                       onClick={() => setEventSheet({ kind: 'edit', event: i.event })}
-                      className="flex w-full items-start gap-1 rounded-lg bg-teal/80 px-1.5 py-1 text-left text-[12px] leading-tight text-ink ring-1 ring-teal-ink/15 ring-inset"
+                      className="font-hand flex w-full items-start gap-1 rounded-lg bg-teal/80 px-1.5 py-1 text-left text-[12.5px] leading-tight text-ink ring-1 ring-teal-ink/15 ring-inset"
                     >
                       {i.event.visibility === 'private' ? <Lock size={11} className="mt-0.5 shrink-0" /> : <CalendarClock size={11} className="mt-0.5 shrink-0" />}
                       <span>
@@ -189,7 +189,7 @@ export function Week() {
                     <li key={t.occ.key}>
                       <button
                         onClick={() => setTaskSheet({ kind: 'edit', item: t })}
-                        className={`relative w-full overflow-hidden rounded-lg bg-canvas py-1 pr-1.5 pl-2.5 text-left text-[12px] leading-tight ring-1 ring-line ring-inset ${
+                        className={`font-hand relative w-full overflow-hidden rounded-lg bg-canvas py-1 pr-1.5 pl-2.5 text-left text-[12.5px] leading-tight ring-1 ring-line ring-inset ${
                           t.completed ? 'text-ink-muted' : ''
                         } ${t.overdue ? 'text-danger' : ''}`}
                       >

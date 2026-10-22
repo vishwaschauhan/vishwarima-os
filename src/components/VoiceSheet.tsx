@@ -98,7 +98,7 @@ function Voice({ options }: { options: VoiceOptions }) {
           <p role="status" className="min-h-6 text-center text-[15px] text-ink-muted">
             {listening ? 'Listening… tap to stop' : speech.state === 'done' && !speech.transcript ? 'I didn’t catch that. Tap to try again.' : 'Tap the microphone and speak'}
           </p>
-          {speech.transcript && <p className="w-full rounded-card bg-marigold-wash px-4 py-3 font-serif text-[18px] italic">“{speech.transcript}”</p>}
+          {speech.transcript && <p className="w-full rounded-card bg-marigold-wash px-4 py-3 font-hand text-[18px]">“{speech.transcript}”</p>}
           <ErrorText>{speech.error}</ErrorText>
           {listening && (
             <button type="button" onClick={speech.cancel} className="text-[14px] text-ink-muted underline underline-offset-2">

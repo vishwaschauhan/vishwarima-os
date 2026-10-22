@@ -37,7 +37,7 @@ export function ListItemRow({
         onToggle={() => background(setItemCompleted(actor, item, !done, shopping))}
       />
       <button type="button" className="min-w-0 flex-1 py-0.5 text-left" onClick={() => onEdit(item)} aria-label={`Edit ${item.title}`}>
-        <p className={`text-[16px] leading-snug font-medium transition-colors duration-300 ${done ? 'text-ink-muted' : ''}`}>
+        <p className={`font-hand text-[16.5px] leading-snug font-medium transition-colors duration-300 ${done ? 'text-ink-muted' : ''}`}>
           <span className={`strike ${done ? 'is-done' : ''}`}>{item.title}</span>
           {qty && !shopping && <span className="font-normal text-ink-muted"> {qty}</span>}
         </p>

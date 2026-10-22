@@ -55,7 +55,7 @@ export function TaskRow({ item, onEdit, showDate = false }: { item: AgendaTask; 
       <div className="flex items-center gap-3 rounded-card border border-dashed border-shared-ink/25 bg-shared/40 px-4 py-3">
         <Sparkles size={18} className="shrink-0 text-shared-ink" aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="text-[16px] font-medium">{occ.title}</p>
+          <p className="font-hand text-[16px] font-medium">{occ.title}</p>
           <p className="text-sm text-ink-muted">{timeLabel(occ.time)}</p>
         </div>
       </div>
@@ -74,7 +74,7 @@ export function TaskRow({ item, onEdit, showDate = false }: { item: AgendaTask; 
           <Checkbox checked={done} label={`${done ? 'Mark not done' : 'Mark done'}: ${occ.title}`} onToggle={() => fire(setCompleted(actor, item, !done))} />
         </div>
         <button className="min-w-0 flex-1 text-left" onClick={() => setOpen(!open)} aria-expanded={open}>
-          <p className={`text-[16px] leading-snug font-medium transition-colors duration-300 ${done || skipped ? 'text-ink-muted' : ''}`}>
+          <p className={`font-hand text-[16.5px] leading-snug font-medium transition-colors duration-300 ${done || skipped ? 'text-ink-muted' : ''}`}>
             <span className={`strike ${done || skipped ? 'is-done' : ''}`}>{occ.title}</span>
           </p>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-ink-muted">
@@ -126,7 +126,7 @@ export function TaskRow({ item, onEdit, showDate = false }: { item: AgendaTask; 
                 return (
                   <li key={s.id} className="flex items-center gap-3">
                     <Checkbox size="sm" checked={sDone} label={`${s.title}`} onToggle={() => fire(setSubtaskDone(actor, item, s.id, !sDone))} />
-                    <span className={`flex-1 text-[14px] ${sDone ? 'text-ink-muted' : ''}`}>
+                    <span className={`font-hand flex-1 text-[15px] ${sDone ? 'text-ink-muted' : ''}`}>
                       <span className={`strike ${sDone ? 'is-done' : ''}`}>{s.title}</span>
                     </span>
                     {s.owner !== 'unassigned' && <OwnerBadge owner={s.owner} />}

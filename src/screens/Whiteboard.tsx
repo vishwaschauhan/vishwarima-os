@@ -98,7 +98,7 @@ export function Whiteboard() {
                 <span className="mb-1 flex items-center gap-1.5 text-[12px] font-semibold tracking-wide text-primary uppercase">
                   <Pin size={12} aria-hidden /> Pinned
                 </span>
-                <span className="line-clamp-3 text-[14px] leading-snug">{titleFromPost(p.body) || p.body}</span>
+                <span className="font-hand line-clamp-3 text-[15px] leading-snug">{titleFromPost(p.body) || p.body}</span>
               </button>
             ))}
           </div>

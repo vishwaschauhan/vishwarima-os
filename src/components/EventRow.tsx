@@ -42,7 +42,7 @@ export function EventRow({
         {e.visibility === 'private' ? <Lock size={16} /> : <CalendarClock size={16} />}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[16px] leading-snug font-medium">{title(e)}</span>
+        <span className="font-hand block text-[16.5px] leading-snug font-medium">{title(e)}</span>
         <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[13px] text-ink-muted">
           {showDate && <span>{shortDate(instance.date)}</span>}
           <span className="font-semibold text-ink">{eventTimeLabel(e)}</span>

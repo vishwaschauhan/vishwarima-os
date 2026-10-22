@@ -104,7 +104,7 @@ export function Today() {
         <span aria-hidden className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-marigold-wash text-primary">
           <Sunrise size={17} />
         </span>
-        <p className="min-w-0 flex-1 pt-1">
+        <p className="font-hand min-w-0 flex-1 pt-1 text-[15px]">
           {tomorrowTasks.length === 0 && tomorrowEvents.length === 0 ? (
             'Nothing planned.'
           ) : (
