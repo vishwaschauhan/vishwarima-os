@@ -1,13 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- VishwarimaOS app icon: the portrait's brushstroke heart (sky blue and blush) around a script V, on a sunset wash. -->
+  <!-- VishwarimaOS app icon: the portrait's brushstroke heart (sky blue and blush) around a script V, on a sunset watercolor wash. -->
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FBE6D4"/>
-      <stop offset="0.55" stop-color="#FCF1E6"/>
-      <stop offset="1" stop-color="#FAF9F6"/>
+      <stop offset="0" stop-color="#F8D9C4"/>
+      <stop offset="0.5" stop-color="#FBEFD9"/>
+      <stop offset="1" stop-color="#FCF7EF"/>
     </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#F3C969" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#F3C969" stop-opacity="0"/>
+    </radialGradient>
   </defs>
   <rect width="512" height="512" fill="url(#sky)"/>
+  <circle cx="256" cy="236" r="190" fill="url(#sun)"/>
   <g fill="none" stroke-linecap="round" stroke-width="30" opacity="0.9">
     <path d="M256 432 C 150 352, 66 270, 84 176 C 98 104, 186 80, 256 152" stroke="#A8C6E6"/>
     <path d="M256 152 C 326 80, 414 104, 428 176 C 446 270, 362 352, 256 432" stroke="#F0B2C3"/>
@@ -16,5 +21,5 @@
     <path d="M128 176 C 132 150, 160 138, 178 152 C 196 166, 226 262, 258 352" stroke-width="13"/>
     <path d="M258 352 C 286 280, 318 196, 344 160 C 360 138, 384 132, 398 146" stroke-width="27"/>
   </g>
-  <path d="M256 412 c -10 -9 -24 -18 -24 -30 c 0 -9 7 -15 15 -15 c 4 0 7 2 9 5 c 2 -3 5 -5 9 -5 c 8 0 15 6 15 15 c 0 12 -14 21 -24 30 z" fill="#EE9AAE"/>
+  <path d="M256 412 c -10 -9 -24 -18 -24 -30 c 0 -9 7 -15 15 -15 c 4 0 7 2 9 5 c 2 -3 5 -5 9 -5 c 8 0 15 6 15 15 c 0 12 -14 21 -24 30 z" fill="#E78976"/>
 </svg>

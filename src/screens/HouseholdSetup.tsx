@@ -1,6 +1,7 @@
 import type { User } from 'firebase/auth'
 import { useState, type FormEvent } from 'react'
-import { Button, Card, ErrorText, Field, Wordmark } from '../components/ui'
+import { PageTitle } from '../components/paint'
+import { Button, Card, ErrorText, Field, Portrait, Wordmark } from '../components/ui'
 import { friendlyError } from '../lib/errors'
 import { acceptInvite, foundHousehold, type Invite, type PlanMemberId } from '../data/household'
 import { resendVerification, signOutUser } from '../lib/authActions'
@@ -34,10 +35,13 @@ export function HouseholdSetup({ user, invite, onDone }: { user: User; invite: I
 
   return (
     <main className="mx-auto max-w-xl px-6 pt-10 pb-12">
-      <Wordmark className="text-xl" />
-      <h1 className="mt-8 font-serif text-[30px] leading-tight tracking-tight">
-        {invite ? 'You’re invited' : 'Set up your household'}
-      </h1>
+      <Wordmark className="text-[22px]" />
+      <div className="mt-6 overflow-hidden rounded-[28px] shadow-lift ring-1 ring-line">
+        <Portrait className="aspect-[2/1] object-[50%_20%]" />
+      </div>
+      <div className="mt-8">
+        <PageTitle>{invite ? 'You’re invited' : 'Set up your household'}</PageTitle>
+      </div>
       <p className="mt-2 text-ink-muted">
         {invite
           ? 'Join the Singh Family household to share tasks and the family calendar.'
@@ -58,7 +62,7 @@ export function HouseholdSetup({ user, invite, onDone }: { user: User; invite: I
                     setPlanMemberId(id)
                     setDisplayName(NAMES[id])
                   }}
-                  className={`min-h-14 rounded-2xl border text-[16px] font-medium transition ${
+                  className={`press min-h-14 rounded-card border text-[16px] font-semibold shadow-paper ${
                     planMemberId === id
                       ? id === 'vishwas'
                         ? 'border-vishwas-ink bg-vishwas text-vishwas-ink'

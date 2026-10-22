@@ -97,7 +97,7 @@ function ItemForm({ mode, onDone }: { mode: ItemSheetMode; onDone: () => void })
 
       <label className="block">
         <span className="mb-1.5 block text-sm text-ink-muted">List</span>
-        <select value={listId} onChange={(e) => setListId(e.target.value)} className="min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-[16px]">
+        <select value={listId} onChange={(e) => setListId(e.target.value)} className="min-h-11 w-full rounded-2xl border border-line bg-surface px-3 text-[16px]">
           {activeLists.map((l) => (
             <option key={l.id} value={l.id}>
               {l.title} {l.type === 'shopping' ? '(shopping)' : '(to-do)'}

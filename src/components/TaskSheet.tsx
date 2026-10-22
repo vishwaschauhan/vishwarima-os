@@ -210,7 +210,7 @@ function TaskForm({ mode, onDone }: { mode: TaskSheetMode; onDone: () => void })
                     aria-pressed={days.includes(d)}
                     aria-label={d}
                     onClick={() => setDays(days.includes(d) ? days.filter((x) => x !== d) : [...days, d])}
-                    className={`size-11 rounded-full text-sm font-medium ${days.includes(d) ? 'bg-ink text-canvas' : 'bg-line/60 text-ink-muted'}`}
+                    className={`press size-11 rounded-full text-sm font-semibold ${days.includes(d) ? 'bg-primary text-on-primary' : 'bg-line/60 text-ink-muted'}`}
                   >
                     {DAY_LABEL[d]}
                   </button>
@@ -271,7 +271,7 @@ export function TextArea({ label, value, onChange, rows = 3 }: { label: string; 
         value={value}
         maxLength={2000}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[16px] text-ink outline-none focus:border-ink-muted"
+        className="w-full rounded-2xl border border-line bg-surface px-3.5 py-2.5 text-[16px] text-ink outline-none transition focus:border-teal-ink focus:ring-3 focus:ring-teal-ink/15"
       />
     </label>
   )

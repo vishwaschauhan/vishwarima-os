@@ -29,16 +29,16 @@ export function ListItemRow({
   const qty = quantityLabel(item)
 
   return (
-    <div className={`relative flex items-center gap-3 overflow-hidden rounded-2xl border bg-surface py-2.5 pr-2 pl-4 ${overdue ? 'border-danger/40' : 'border-line'}`}>
-      <span className={`absolute inset-y-0 left-0 w-1 ${OWNER_BAR[item.assignedTo]}`} aria-hidden />
+    <div className={`relative flex items-center gap-3 overflow-hidden rounded-card border bg-surface py-2.5 pr-2 pl-4 shadow-paper ${overdue ? 'border-danger/40' : 'border-line'} ${done ? 'bg-surface/70' : ''}`}>
+      <span className={`absolute inset-y-2 left-0 w-1.5 rounded-r-full ${OWNER_BAR[item.assignedTo]}`} aria-hidden />
       <Checkbox
         checked={done}
         label={`${done ? (shopping ? 'Mark not bought' : 'Mark not done') : shopping ? 'Mark bought' : 'Mark done'}: ${item.title}`}
         onToggle={() => background(setItemCompleted(actor, item, !done, shopping))}
       />
       <button type="button" className="min-w-0 flex-1 py-0.5 text-left" onClick={() => onEdit(item)} aria-label={`Edit ${item.title}`}>
-        <p className={`text-[16px] leading-snug font-medium transition-all duration-300 ${done ? 'text-ink-muted line-through decoration-ink-muted/60' : ''}`}>
-          {item.title}
+        <p className={`text-[16px] leading-snug font-medium transition-colors duration-300 ${done ? 'text-ink-muted' : ''}`}>
+          <span className={`strike ${done ? 'is-done' : ''}`}>{item.title}</span>
           {qty && !shopping && <span className="font-normal text-ink-muted"> {qty}</span>}
         </p>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-ink-muted">
@@ -82,7 +82,7 @@ export function ListItemRow({
       ) : (
         <span className="flex shrink-0 items-center gap-1">
           {shopping && !done && (
-            <span className="flex items-center rounded-full bg-canvas ring-1 ring-line" aria-label={`Quantity of ${item.title}`}>
+            <span className="flex items-center rounded-full bg-marigold-wash/70 ring-1 ring-line" aria-label={`Quantity of ${item.title}`}>
               <MiniButton
                 label={`Fewer ${item.title}`}
                 onClick={(item.quantity ?? 1) > 1 ? () => background(setItemQuantity(actor, item, (item.quantity ?? 1) - 1 || null)) : undefined}

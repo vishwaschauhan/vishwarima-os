@@ -101,7 +101,7 @@ function LiveHousehold({ user, householdId }: { user: User; householdId: string 
 function Splash() {
   return (
     <Centered>
-      <Wordmark className="animate-pulse text-2xl text-ink-muted" />
+      <Wordmark className="animate-pulse text-[28px] text-ink-muted" />
     </Centered>
   )
 }

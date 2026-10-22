@@ -6,13 +6,13 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'quiet' }) {
   const styles = {
-    primary: 'bg-ink text-canvas hover:opacity-90',
-    secondary: 'bg-surface text-ink border border-line hover:bg-canvas',
+    primary: 'bg-primary text-on-primary shadow-paper hover:brightness-105',
+    secondary: 'bg-surface text-ink border border-line shadow-paper hover:border-ink-muted/50',
     quiet: 'text-ink-muted hover:text-ink',
   }[variant]
   return (
     <button
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-[15px] font-medium transition disabled:opacity-50 ${styles} ${className}`}
+      className={`press inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-[15px] font-semibold disabled:opacity-50 ${styles} ${className}`}
       {...props}
     />
   )
@@ -21,9 +21,9 @@ export function Button({
 export function Field({ label, ...props }: InputHTMLAttributes<HTMLInputElement> & { label: string }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm text-ink-muted">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-ink-muted">{label}</span>
       <input
-        className="min-h-11 w-full rounded-xl border border-line bg-surface px-3.5 text-[16px] text-ink outline-none transition focus:border-ink-muted"
+        className="min-h-11 w-full rounded-2xl border border-line bg-surface px-3.5 text-[16px] text-ink outline-none transition focus:border-teal-ink focus:ring-3 focus:ring-teal-ink/15 aria-invalid:border-danger"
         {...props}
       />
     </label>
@@ -31,13 +31,13 @@ export function Field({ label, ...props }: InputHTMLAttributes<HTMLInputElement>
 }
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${className}`}>{children}</div>
+  return <div className={`rounded-card border border-line bg-surface p-5 shadow-paper ${className}`}>{children}</div>
 }
 
 export function ErrorText({ children }: { children: ReactNode }) {
   if (!children) return null
   return (
-    <p role="alert" className="text-sm text-danger">
+    <p role="alert" className="rounded-2xl bg-danger/10 px-3.5 py-2.5 text-sm font-medium text-danger">
       {children}
     </p>
   )
@@ -65,5 +65,9 @@ export function Portrait({ className = '' }: { className?: string }) {
 }
 
 export function Wordmark({ className = '' }: { className?: string }) {
-  return <span className={`font-serif tracking-tight ${className}`}>VishwarimaOS</span>
+  return (
+    <span className={`font-serif font-medium tracking-tight ${className}`}>
+      Vishwarima<span className="text-primary">OS</span>
+    </span>
+  )
 }

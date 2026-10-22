@@ -6,6 +6,7 @@ import { useStoredState } from '../app/useStoredState'
 import { Empty, OwnerFilterBar, SectionTitle, Skeleton } from '../components/bits'
 import { TaskRow } from '../components/TaskRow'
 import { TaskSheet, type TaskSheetMode } from '../components/TaskSheet'
+import { PageTitle } from '../components/paint'
 import { Button } from '../components/ui'
 import { matchesOwner, type AgendaTask, type OwnerFilter } from '../domain/agenda'
 import { addDays } from '../domain/dates'
@@ -41,7 +42,7 @@ export function Tasks() {
   return (
     <div>
       <div className="flex items-end justify-between">
-        <h1 className="font-serif text-[30px] leading-tight tracking-tight">Tasks</h1>
+        <PageTitle>Tasks</PageTitle>
         <Button onClick={() => setSheet({ kind: 'new', date: null })} className="px-4">
           <ListPlus size={18} aria-hidden /> New task
         </Button>

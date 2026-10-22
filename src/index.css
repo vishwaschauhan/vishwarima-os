@@ -1,15 +1,21 @@
 @import 'tailwindcss';
 
-/* Design tokens. Pastels are surfaces only; text on them uses the deeper `-ink` tones. */
+/*
+ * VishwarimaOS design tokens: a watercolor family journal.
+ * Pastels are surfaces only; text on them uses the deeper `-ink` tones (all pairs checked for WCAG AA).
+ * Owner colours: Vishwas = sky, Garima = blush, Both = lavender.
+ */
 @theme {
-  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-serif: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --font-sans: 'DM Sans Variable', 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Fraunces Variable', 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
 
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
   --color-vishwas: var(--vishwas);
   --color-vishwas-ink: var(--vishwas-ink);
   --color-garima: var(--garima);
@@ -18,85 +24,232 @@
   --color-shared-ink: var(--shared-ink);
   --color-sage: var(--sage);
   --color-sage-ink: var(--sage-ink);
+  --color-teal: var(--teal);
+  --color-teal-ink: var(--teal-ink);
+  --color-marigold: var(--marigold);
+  --color-marigold-wash: var(--marigold-wash);
+  --color-coral: var(--coral);
   --color-danger: var(--danger);
+
+  --radius-card: 20px;
+  --shadow-paper: var(--paper-shadow);
+  --shadow-lift: var(--lift-shadow);
+  --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 :root {
-  --canvas: #faf9f6;
-  --surface: #ffffff;
-  --ink: #252525;
-  --ink-muted: #6b6762;
-  --line: #e8e4dd;
-  --vishwas: #dcebfa;
-  --vishwas-ink: #1f4f7a;
-  --garima: #f7dfe7;
-  --garima-ink: #8a2f4f;
-  --shared: #eae3f5;
-  --shared-ink: #4f3a7a;
-  --sage: #dce9de;
-  --sage-ink: #2f5a3a;
-  --danger: #a33a2a;
+  --canvas: #fcf7ef;
+  --surface: #fffdf8;
+  --ink: #34302d;
+  --ink-muted: #665f59;
+  --line: #e9dfd4;
+  --primary: #a9533f;
+  --on-primary: #fffdf8;
+  --vishwas: #d6e8f2;
+  --vishwas-ink: #24577a;
+  --garima: #f3d6dc;
+  --garima-ink: #8e3550;
+  --shared: #e8ddf1;
+  --shared-ink: #5a3f80;
+  --sage: #dfeadf;
+  --sage-ink: #3f6b4c;
+  --teal: #ddedec;
+  --teal-ink: #2f6668;
+  --marigold: #e6b657;
+  --marigold-wash: #fbefd3;
+  --coral: #e78976;
+  --danger: #a8402f;
+  --focus: #2f6668;
+  --paper-shadow: 0 1px 0 rgb(120 80 50 / 0.04), 0 10px 24px -16px rgb(120 80 50 / 0.28);
+  --lift-shadow: 0 2px 4px rgb(120 80 50 / 0.06), 0 18px 40px -18px rgb(120 70 40 / 0.4);
+  --wash-a: rgb(240 178 140 / 0.3);
+  --wash-b: rgb(168 198 230 / 0.26);
+  --wash-c: rgb(154 181 160 / 0.2);
+  --grain-opacity: 0.05;
   color-scheme: light;
 }
 
-/* Dark theme: follows the phone unless a theme is chosen in Settings (data-theme on <html>). */
+/* Evening journal: deeper paper, softer pigments. Follows the phone unless a theme is chosen in Settings. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --canvas: #1c1b1a;
-    --surface: #262524;
-    --ink: #f3f1ec;
-    --ink-muted: #a8a39c;
-    --line: #3a3836;
-    --vishwas: #233547;
-    --vishwas-ink: #b7d6f3;
-    --garima: #45293a;
-    --garima-ink: #f2c1d2;
-    --shared: #352d47;
-    --shared-ink: #d6c9ef;
-    --sage: #273a2c;
-    --sage-ink: #bfdcc5;
-    --danger: #f0a090;
+    --canvas: #1d1916;
+    --surface: #28221e;
+    --ink: #f5ede3;
+    --ink-muted: #b3a89d;
+    --line: #3d352f;
+    --primary: #e8937f;
+    --on-primary: #2a1712;
+    --vishwas: #22394a;
+    --vishwas-ink: #bcddf2;
+    --garima: #4a2933;
+    --garima-ink: #f5c6d2;
+    --shared: #382d49;
+    --shared-ink: #dccdf2;
+    --sage: #263a2d;
+    --sage-ink: #bfe0c6;
+    --teal: #1f3a3b;
+    --teal-ink: #a9d8d6;
+    --marigold: #d9a845;
+    --marigold-wash: #3a2f1a;
+    --coral: #e8937f;
+    --danger: #f2a08f;
+    --focus: #a9d8d6;
+    --paper-shadow: 0 1px 0 rgb(0 0 0 / 0.2), 0 10px 24px -16px rgb(0 0 0 / 0.6);
+    --lift-shadow: 0 2px 4px rgb(0 0 0 / 0.25), 0 18px 40px -18px rgb(0 0 0 / 0.7);
+    --wash-a: rgb(200 110 80 / 0.14);
+    --wash-b: rgb(90 130 170 / 0.13);
+    --wash-c: rgb(100 140 110 / 0.1);
+    --grain-opacity: 0.035;
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --canvas: #1c1b1a;
-  --surface: #262524;
-  --ink: #f3f1ec;
-  --ink-muted: #a8a39c;
-  --line: #3a3836;
-  --vishwas: #233547;
-  --vishwas-ink: #b7d6f3;
-  --garima: #45293a;
-  --garima-ink: #f2c1d2;
-  --shared: #352d47;
-  --shared-ink: #d6c9ef;
-  --sage: #273a2c;
-  --sage-ink: #bfdcc5;
-  --danger: #f0a090;
+  --canvas: #1d1916;
+  --surface: #28221e;
+  --ink: #f5ede3;
+  --ink-muted: #b3a89d;
+  --line: #3d352f;
+  --primary: #e8937f;
+  --on-primary: #2a1712;
+  --vishwas: #22394a;
+  --vishwas-ink: #bcddf2;
+  --garima: #4a2933;
+  --garima-ink: #f5c6d2;
+  --shared: #382d49;
+  --shared-ink: #dccdf2;
+  --sage: #263a2d;
+  --sage-ink: #bfe0c6;
+  --teal: #1f3a3b;
+  --teal-ink: #a9d8d6;
+  --marigold: #d9a845;
+  --marigold-wash: #3a2f1a;
+  --coral: #e8937f;
+  --danger: #f2a08f;
+  --focus: #a9d8d6;
+  --paper-shadow: 0 1px 0 rgb(0 0 0 / 0.2), 0 10px 24px -16px rgb(0 0 0 / 0.6);
+  --lift-shadow: 0 2px 4px rgb(0 0 0 / 0.25), 0 18px 40px -18px rgb(0 0 0 / 0.7);
+  --wash-a: rgb(200 110 80 / 0.14);
+  --wash-b: rgb(90 130 170 / 0.13);
+  --wash-c: rgb(100 140 110 / 0.1);
+  --grain-opacity: 0.035;
   color-scheme: dark;
 }
 
 html,
 body {
-  background: var(--canvas);
+  background-color: var(--canvas);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Watercolor washes bleed in from the corners; reading surfaces stay clean paper on top. */
 body {
   min-height: 100dvh;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background-image:
+    radial-gradient(60% 38% at 8% -4%, var(--wash-a), transparent 70%),
+    radial-gradient(48% 32% at 104% 6%, var(--wash-b), transparent 72%),
+    radial-gradient(55% 30% at 90% 104%, var(--wash-c), transparent 70%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* Soft paper grain over everything, too faint to touch text contrast. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.2 0 0 0 0 0.1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.font-serif {
+  /* Fraunces' soft axis rounds the serifs, like lettering done with a brush. */
+  font-variation-settings: 'SOFT' 100, 'WONK' 0;
+}
+
+/* One clear focus ring for every control. In the base layer so fields with their own focus style can opt out. */
+@layer base {
+  :focus-visible {
+    outline: 2.5px solid var(--focus);
+    outline-offset: 2px;
+  }
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline-offset: 0;
+  }
+}
+
+::selection {
+  background: var(--marigold-wash);
+  color: var(--ink);
+}
+
+/* A painted wash behind text, like a highlighter brush. Used for the selected day and small labels. */
+.paint-wash {
+  background:
+    radial-gradient(70% 90% at 30% 40%, var(--marigold-wash), transparent 75%),
+    radial-gradient(60% 80% at 80% 70%, color-mix(in srgb, var(--coral) 22%, transparent), transparent 75%);
+}
+
+/* Completed text: a strikethrough that draws across, rather than appearing. */
+.strike {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 58%;
+  background-size: 0% 1.5px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition: background-size 320ms var(--ease-soft), color 200ms ease;
+}
+.strike.is-done {
+  background-size: 100% 1.5px;
+}
+@media (forced-colors: active) {
+  .strike.is-done {
+    text-decoration: line-through;
+  }
+}
+
+/* Checkbox tick draws itself in. */
+.tick {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  transition: stroke-dashoffset 260ms var(--ease-soft) 60ms;
+}
+[aria-checked='true'] .tick {
+  stroke-dashoffset: 0;
+}
+.check-pop {
+  transition: transform 220ms var(--ease-soft), background-color 200ms ease, border-color 200ms ease;
+}
+button:active .check-pop {
+  transform: scale(0.88);
+}
+
+/* Pressable things sink slightly. */
+.press {
+  transition: transform 140ms ease, box-shadow 200ms ease, background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+.press:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 /* Bottom sheets slide up on phones and fade in on larger screens. */
 dialog.sheet[open] {
-  animation: sheet-up 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: sheet-up 260ms var(--ease-soft);
 }
 dialog.sheet[open]::backdrop {
   animation: fade-in 200ms ease-out;
+}
+dialog.sheet::backdrop {
+  background: rgb(52 36 26 / 0.38);
+  backdrop-filter: blur(2px);
 }
 @keyframes sheet-up {
   from {
@@ -115,22 +268,65 @@ dialog.sheet[open]::backdrop {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+/* Screens settle in when you switch tabs. */
+.page-enter {
+  animation: page-in 220ms var(--ease-soft);
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Decorative paint (underlines, sprigs) brushes in once. */
+.brush-in {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: brush 700ms var(--ease-soft) 120ms forwards;
+}
+@keyframes brush {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Warm skeleton shimmer. */
+.skeleton {
+  background: linear-gradient(100deg, color-mix(in srgb, var(--line) 55%, transparent) 30%, color-mix(in srgb, var(--marigold-wash) 80%, transparent) 50%, color-mix(in srgb, var(--line) 55%, transparent) 70%);
+  background-size: 300% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
   }
 }
 
 /* New list items settle in gently. */
 .list-item-enter {
-  animation: item-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: item-in 220ms var(--ease-soft);
 }
 @keyframes item-in {
   from {
     transform: translateY(-4px);
     opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  .brush-in {
+    stroke-dashoffset: 0;
   }
 }

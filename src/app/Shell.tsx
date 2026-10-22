@@ -1,8 +1,9 @@
 import { CalendarDays, CalendarHeart, ListChecks, ListTodo, MessagesSquare, Settings as SettingsIcon, Sun } from 'lucide-react'
-import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
+import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AddButton, AddMenu } from '../components/AddMenu'
 import { SyncStatus, Toasts } from '../components/bits'
 import { VoiceSheet } from '../components/VoiceSheet'
+import { PaintedHeart, Sprig } from '../components/paint'
 import { Wordmark } from '../components/ui'
 import { Calendar } from '../screens/Calendar'
 import { Lists } from '../screens/Lists'
@@ -38,7 +39,7 @@ function useUnread() {
 function Badge({ count }: { count: number }) {
   if (!count) return null
   return (
-    <span aria-hidden className="absolute -top-1 left-1/2 ml-1.5 min-w-4 rounded-full bg-garima-ink px-1 text-center text-[10px] leading-4 font-semibold text-canvas">
+    <span aria-hidden className="absolute -top-1 left-1/2 ml-1.5 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] leading-4 font-bold text-on-primary ring-2 ring-canvas">
       {count > 9 ? '9+' : count}
     </span>
   )
@@ -46,11 +47,18 @@ function Badge({ count }: { count: number }) {
 
 export function Shell() {
   const unread = useUnread()
+  // Screens settle in when you change tab (not when only the day or list in the URL changes).
+  const section = useLocation().pathname.split('/')[1]
   return (
     <div className="mx-auto min-h-dvh max-w-6xl lg:flex">
       {/* Desktop sidebar */}
-      <nav aria-label="Main" className="sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1 border-r border-line px-4 py-6 lg:flex">
-        <Wordmark className="mb-6 px-3 text-[20px]" />
+      <nav aria-label="Main" className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 px-4 py-6 lg:flex">
+        <div className="mb-6 px-3">
+          <Wordmark className="text-[23px]" />
+          <p className="mt-0.5 font-serif text-[13px] whitespace-nowrap text-ink-muted italic">
+            Our days, beautifully organized <PaintedHeart className="inline size-3 align-[-1px]" />
+          </p>
+        </div>
         {TABS.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
@@ -58,7 +66,7 @@ export function Shell() {
             end={end}
             aria-label={to === '/whiteboard' && unread ? `${label}, ${unread} unread` : undefined}
             className={({ isActive }) =>
-              `flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition ${isActive ? 'bg-surface text-ink shadow-sm ring-1 ring-line' : 'text-ink-muted hover:text-ink'}`
+              `press flex min-h-11 items-center gap-3 rounded-2xl px-3 text-[15px] font-semibold ${isActive ? 'bg-surface text-ink shadow-paper ring-1 ring-line [&_svg]:text-primary' : 'text-ink-muted hover:bg-surface/60 hover:text-ink'}`
             }
           >
             <span className="relative">
@@ -68,11 +76,12 @@ export function Shell() {
             {label}
           </NavLink>
         ))}
+        <Sprig className="mt-auto ml-2 h-12 w-28 opacity-80" />
       </nav>
 
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-10 flex min-h-14 items-center justify-between bg-canvas/85 px-5 backdrop-blur-md lg:justify-end">
-          <Wordmark className="text-[18px] lg:hidden" />
+        <header className="sticky top-0 z-10 flex min-h-14 items-center justify-between bg-canvas/80 px-5 backdrop-blur-md lg:justify-end lg:bg-transparent lg:backdrop-blur-none">
+          <Wordmark className="text-[20px] lg:hidden" />
           <div className="flex items-center gap-1">
             <SyncStatus />
             <NavLink
@@ -86,7 +95,7 @@ export function Shell() {
             </NavLink>
           </div>
         </header>
-        <main className="mx-auto max-w-2xl px-5 pt-2 pb-[calc(9rem+env(safe-area-inset-bottom))] lg:max-w-none lg:px-8 lg:pb-12">
+        <main key={section} className="page-enter mx-auto max-w-2xl px-5 pt-2 pb-[calc(9rem+env(safe-area-inset-bottom))] lg:max-w-none lg:px-8 lg:pb-12">
           <Routes>
             <Route path="/" element={<Today />} />
             <Route path="/week" element={<Week />} />
@@ -108,7 +117,7 @@ export function Shell() {
       {/* Phone tab bar */}
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-canvas/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_-20px_rgb(120_80_50/0.35)] backdrop-blur-md lg:hidden"
       >
         <div className="mx-auto flex max-w-xl">
           {TABS.filter((t) => t.phone).map(({ to, label, icon: Icon, end }) => (
@@ -118,10 +127,10 @@ export function Shell() {
               end={end}
               aria-label={to === '/whiteboard' && unread ? `${label}, ${unread} unread` : undefined}
               className={({ isActive }) =>
-                `flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition ${isActive ? 'text-ink' : 'text-ink-muted'}`
+                `group flex min-h-[3.75rem] flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition ${isActive ? 'active text-ink' : 'text-ink-muted'}`
               }
             >
-              <span className="relative">
+              <span className="relative inline-flex h-8 w-14 items-center justify-center rounded-full transition duration-200 group-[.active]:bg-marigold-wash group-[.active]:text-primary">
                 <Icon size={22} strokeWidth={1.8} aria-hidden />
                 {to === '/whiteboard' && <Badge count={unread} />}
               </span>

@@ -10,6 +10,7 @@ import { ListItemSheet, type ItemSheetMode } from '../components/ListItemSheet'
 import { ManageListsSheet } from '../components/ManageListsSheet'
 import { MicButton } from '../components/AddMenu'
 import { Sheet } from '../components/bits'
+import { PageTitle } from '../components/paint'
 import { clearCompleted, createItem, restoreItem, swapOrder, useClearedItems } from '../data/lists'
 import {
   estimatedTotal,
@@ -75,7 +76,7 @@ function ListsHeader({ active, current }: { active: ListDef[]; current?: ListDef
   return (
     <>
       <div className="flex items-end justify-between gap-2">
-        <h1 className="font-serif text-[30px] leading-tight tracking-tight">Lists</h1>
+        <PageTitle>Lists</PageTitle>
         <div className="flex items-center gap-1">
           <Link to="/tasks" className="inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-[14px] font-medium text-ink-muted hover:text-ink">
             <ListChecks size={17} aria-hidden /> Tasks
@@ -85,7 +86,7 @@ function ListsHeader({ active, current }: { active: ListDef[]; current?: ListDef
             type="button"
             onClick={() => setManage(true)}
             aria-label="Manage lists"
-            className="inline-flex size-11 items-center justify-center rounded-full text-ink-muted transition hover:bg-line/50 hover:text-ink"
+            className="press inline-flex size-11 items-center justify-center rounded-full text-ink-muted hover:bg-line/50 hover:text-ink"
           >
             <Settings2 size={19} />
           </button>
@@ -97,7 +98,7 @@ function ListsHeader({ active, current }: { active: ListDef[]; current?: ListDef
           items.length === 0 ? null : (
             <div key={label} className="-mx-5 overflow-x-auto px-5">
               <div className="flex items-center gap-1.5">
-                <span className="mr-1 shrink-0 text-ink-muted" aria-label={label} title={label}>
+                <span className={`mr-1 inline-flex size-8 shrink-0 items-center justify-center rounded-full ${label === 'Shopping' ? 'bg-marigold-wash text-ink' : 'bg-teal text-teal-ink'}`} aria-label={label} title={label}>
                   {label === 'Shopping' ? <ShoppingBasket size={17} /> : <ListChecks size={17} />}
                 </span>
                 {items.map((l) => {
@@ -109,8 +110,8 @@ function ListsHeader({ active, current }: { active: ListDef[]; current?: ListDef
                       to={`/lists/${l.id}`}
                       replace
                       aria-current={sel ? 'page' : undefined}
-                      className={`inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[14px] font-medium whitespace-nowrap transition ${
-                        sel ? 'bg-ink text-canvas' : 'bg-surface text-ink ring-1 ring-line hover:ring-ink-muted'
+                      className={`press inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[14px] font-semibold whitespace-nowrap ${
+                        sel ? 'bg-ink text-canvas shadow-paper' : 'bg-surface text-ink shadow-paper ring-1 ring-line hover:ring-ink-muted/60'
                       }`}
                     >
                       {l.title}
@@ -201,7 +202,7 @@ function ListView({ list }: { list: ListDef }) {
               placeholder={`Search ${list.title}`}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="min-h-11 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3.5 text-[16px] outline-none focus:border-ink-muted"
+              className="min-h-11 min-w-0 flex-1 rounded-2xl border border-line bg-surface px-3.5 text-[16px] outline-none focus:border-teal-ink"
             />
             <select
               aria-label="Sort by"
@@ -210,7 +211,7 @@ function ListView({ list }: { list: ListDef }) {
                 setSort(e.target.value as ItemSort)
                 setReorder(false)
               }}
-              className="min-h-11 rounded-xl border border-line bg-surface px-2 text-[15px]"
+              className="min-h-11 rounded-2xl border border-line bg-surface px-2 text-[15px]"
             >
               <option value="manual">My order</option>
               <option value="due">Due date</option>
@@ -304,7 +305,7 @@ function QuickAddItem({ list }: { list: ListDef }) {
   }
 
   return (
-    <form onSubmit={add} className="flex items-center gap-2 rounded-2xl border border-line bg-surface p-1.5 pl-4 focus-within:border-ink-muted">
+    <form onSubmit={add} className="flex items-center gap-2 rounded-card border border-line bg-surface p-1.5 pl-4 shadow-paper transition focus-within:border-teal-ink focus-within:ring-3 focus-within:ring-teal-ink/15">
       <input
         ref={inputRef}
         value={text}
@@ -313,14 +314,14 @@ function QuickAddItem({ list }: { list: ListDef }) {
         enterKeyHint="enter"
         aria-label={`Add to ${list.title}`}
         placeholder={shopping ? `Add to ${list.title} (e.g. Milk x2)` : `Add a to-do to ${list.title}`}
-        className="min-h-10 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-ink-muted/70"
+        className="min-h-10 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-ink-muted/80"
       />
       {!text.trim() && <MicButton compact listId={list.id} />}
       <button
         type="submit"
         aria-label="Add"
         disabled={!text.trim()}
-        className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-canvas transition disabled:opacity-30"
+        className="press inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary disabled:opacity-30"
       >
         <Plus size={20} />
       </button>

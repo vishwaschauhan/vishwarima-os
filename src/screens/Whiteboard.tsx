@@ -4,6 +4,7 @@ import { useHousehold } from '../app/household'
 import { background } from '../app/toast'
 import { useNow } from '../app/useNow'
 import { Empty, Skeleton } from '../components/bits'
+import { PageTitle } from '../components/paint'
 import { MessageText, PostSheet } from '../components/PostSheet'
 import { createPost, markWhiteboardSeen, newPostId, usePinnedPosts, useRecentPosts } from '../data/whiteboard'
 import { addDays } from '../domain/dates'
@@ -56,7 +57,7 @@ export function Whiteboard() {
   return (
     <div>
       <div className="flex items-end justify-between gap-2">
-        <h1 className="font-serif text-[30px] leading-tight tracking-tight">Whiteboard</h1>
+        <PageTitle eyebrow="Family noticeboard">Whiteboard</PageTitle>
         <button
           type="button"
           aria-label="Search messages"
@@ -78,21 +79,23 @@ export function Whiteboard() {
           placeholder="Search loaded messages"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="mt-3 min-h-11 w-full rounded-xl border border-line bg-surface px-3.5 text-[16px] outline-none focus:border-ink-muted"
+          className="mt-3 min-h-11 w-full rounded-2xl border border-line bg-surface px-3.5 text-[16px] outline-none focus:border-teal-ink"
         />
       )}
 
       {pins.length > 0 && (
-        <section aria-label="Pinned" className="-mx-5 mt-4 overflow-x-auto px-5">
-          <div className="flex gap-2">
+        <section aria-label="Pinned" className="-mx-5 mt-4 overflow-x-auto px-5 pt-2 pb-2">
+          <div className="flex gap-3">
             {pins.map((p) => (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => setOpen(p)}
-                className="w-64 shrink-0 rounded-2xl bg-shared/70 px-4 py-3 text-left ring-1 ring-shared-ink/10"
+                className="press relative w-64 shrink-0 rounded-[18px] bg-marigold-wash px-4 pt-4 pb-3 text-left shadow-paper ring-1 ring-marigold/30"
               >
-                <span className="mb-1 flex items-center gap-1.5 text-[12px] font-semibold tracking-wide text-shared-ink uppercase">
+                {/* A strip of washi tape holds the note up. */}
+                <span aria-hidden className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 -rotate-3 rounded-[3px] bg-coral/35" />
+                <span className="mb-1 flex items-center gap-1.5 text-[12px] font-semibold tracking-wide text-primary uppercase">
                   <Pin size={12} aria-hidden /> Pinned
                 </span>
                 <span className="line-clamp-3 text-[14px] leading-snug">{titleFromPost(p.body) || p.body}</span>
@@ -106,7 +109,7 @@ export function Whiteboard() {
       <div className="mt-5 min-h-[calc(100dvh-24rem)]">
         {hasMore && !search && (
           <div className="mb-4 text-center">
-            <button type="button" onClick={() => setCount(count + PAGE)} className="min-h-10 rounded-full px-4 text-[14px] font-medium text-ink-muted ring-1 ring-line hover:text-ink">
+            <button type="button" onClick={() => setCount(count + PAGE)} className="press min-h-10 rounded-full bg-surface px-4 text-[14px] font-semibold text-ink-muted ring-1 ring-line hover:text-ink">
               Show earlier messages
             </button>
           </div>
@@ -119,8 +122,10 @@ export function Whiteboard() {
           <ol className="space-y-1.5" aria-label="Messages">
             {groups.map((g) => (
               <Fragment key={g.date}>
-                <li className="pt-3 pb-1 text-center text-[12px] font-medium tracking-wide text-ink-muted uppercase" aria-hidden>
-                  {dayLabel(g.date)}
+                <li className="flex items-center gap-3 pt-4 pb-1.5 text-[13px] text-ink-muted" aria-hidden>
+                  <span className="h-px flex-1 bg-gradient-to-r from-transparent to-line" />
+                  <span className="font-serif italic">{dayLabel(g.date)}</span>
+                  <span className="h-px flex-1 bg-gradient-to-l from-transparent to-line" />
                 </li>
                 {g.posts.map((p, i) => (
                   <li key={p.id} id={`post-${p.id}`}>
@@ -144,22 +149,22 @@ function Message({ post, showAuthor, onOpen }: { post: WhiteboardPost; showAutho
   const { user, members, memberName } = useHousehold()
   const mine = post.authorId === user.uid
   const author = members.find((m) => m.uid === post.authorId)
-  const tone = author?.planMemberId === 'garima' ? 'bg-garima/70' : author?.planMemberId === 'vishwas' ? 'bg-vishwas/70' : 'bg-surface'
+  const tone = author?.planMemberId === 'garima' ? 'bg-garima/75' : author?.planMemberId === 'vishwas' ? 'bg-vishwas/75' : 'bg-surface'
   const links = linksIn(post.body)
   const reactions = Object.entries(post.reactions)
   const time = post.createdAt?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 
   return (
     <div className={`flex flex-col ${mine ? 'items-end' : 'items-start'}`}>
-      {showAuthor && <p className="mt-2 mb-1 px-1 text-[12px] font-medium text-ink-muted">{mine ? 'You' : memberName(post.authorId)}</p>}
+      {showAuthor && <p className="mt-2 mb-1 px-1 text-[12px] font-semibold text-ink-muted">{mine ? 'You' : memberName(post.authorId)}</p>}
       <button
         type="button"
         onClick={onOpen}
         aria-label={`Message from ${mine ? 'you' : memberName(post.authorId)}${time ? ` at ${time}` : ''}. Open actions`}
-        className={`max-w-[85%] rounded-3xl px-4 py-2.5 text-left ${tone} ${mine ? 'rounded-br-lg' : 'rounded-bl-lg'} ${post.pinned ? 'ring-1 ring-shared-ink/30' : ''}`}
+        className={`press max-w-[85%] rounded-[22px] px-4 py-2.5 text-left shadow-paper ring-1 ring-ink/5 ${tone} ${mine ? 'rounded-br-md' : 'rounded-bl-md'} ${post.pinned ? 'ring-marigold/60' : ''}`}
       >
         <MessageText body={post.body} linkify={false} />
-        <span className="mt-1 flex items-center justify-end gap-1.5 text-[11px] text-ink-muted">
+        <span className="mt-1 flex items-center justify-end gap-1.5 text-[12px] text-ink-muted">
           {post.pinned && <Pin size={11} aria-label="Pinned" />}
           {post.editedAt && <span>edited</span>}
           {post.pending ? <span className="italic">Sending…</span> : <span>{time}</span>}
@@ -173,7 +178,7 @@ function Message({ post, showAuthor, onOpen }: { post: WhiteboardPost; showAutho
               href={l.href}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-surface px-3 text-[12px] font-medium text-ink-muted ring-1 ring-line hover:text-ink"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-surface px-3 text-[13px] font-semibold text-teal-ink shadow-paper ring-1 ring-line hover:ring-teal-ink/40"
             >
               <ExternalLink size={12} aria-hidden /> {l.host}
             </a>
@@ -222,7 +227,7 @@ function Composer() {
   return (
     <form
       onSubmit={send}
-      className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-10 mt-5 flex items-end gap-2 rounded-3xl border border-line bg-surface/95 p-1.5 pl-4 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-md lg:bottom-4"
+      className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-10 mt-5 flex items-end gap-2 rounded-[26px] border border-line bg-surface/95 p-1.5 pl-4 shadow-lift backdrop-blur-md transition focus-within:border-teal-ink lg:bottom-4"
     >
       <textarea
         ref={ref}
@@ -233,13 +238,13 @@ function Composer() {
         onKeyDown={onKey}
         aria-label="Write a message"
         placeholder="Write a note… (links welcome)"
-        className="max-h-40 min-h-10 min-w-0 flex-1 resize-none bg-transparent py-2 text-[16px] leading-snug outline-none placeholder:text-ink-muted/70"
+        className="max-h-40 min-h-10 min-w-0 flex-1 resize-none bg-transparent py-2 text-[16px] leading-snug outline-none placeholder:text-ink-muted/80"
       />
       <button
         type="submit"
         aria-label="Send"
         disabled={!text.trim()}
-        className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-canvas transition disabled:opacity-30"
+        className="press inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary disabled:opacity-30"
       >
         <ArrowUp size={20} />
       </button>

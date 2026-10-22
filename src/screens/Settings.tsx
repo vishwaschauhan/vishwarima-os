@@ -83,7 +83,7 @@ function SettingsHome() {
       <ThemePicker />
 
       <SectionTitle>Plan and review</SectionTitle>
-      <div className="overflow-hidden rounded-2xl border border-line bg-surface">
+      <div className="overflow-hidden rounded-card border border-line bg-surface shadow-paper">
         <Row to="/settings/plan" label="Family plan" detail={versions.at(-1)?.id} />
         {pilot && <Row to="/settings/review" label="Pilot review" detail={`${pilot.start.slice(5)} – ${pilot.end.slice(5)}`} />}
         <Row to="/settings/activity" label="Activity" />
@@ -170,7 +170,7 @@ function InvitePartner() {
         <label className="block">
           <span className="mb-1.5 block text-sm text-ink-muted">They are</span>
           <select
-            className="min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-[16px]"
+            className="min-h-11 w-full rounded-2xl border border-line bg-surface px-3 text-[16px]"
             value={planMemberId}
             onChange={(e) => setPlanMemberId(e.target.value as PlanMemberId)}
           >
@@ -264,7 +264,7 @@ function Activity() {
   const { data, loading } = useActivity(household.id, 100)
   if (loading && !data.length) return <p className="text-ink-muted">Loading…</p>
   return (
-    <ul className="divide-y divide-line rounded-2xl border border-line bg-surface">
+    <ul className="divide-y divide-line rounded-card border border-line bg-surface shadow-paper">
       {data.map((a) => (
         <li key={a.id} className="px-4 py-3 text-[14px]">
           <span className="font-medium">{memberName(a.actorUid)}</span> {ACTION_LABEL[a.action] ?? a.action}
