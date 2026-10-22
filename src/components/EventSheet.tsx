@@ -168,7 +168,7 @@ function EventForm({ mode, onDone }: { mode: EventSheetMode; onDone: () => void 
           <select
             value={type}
             onChange={(e) => setType(e.target.value as FamilyEvent['type'])}
-            className="min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-[16px]"
+            className="min-h-11 w-full rounded-2xl border border-line bg-surface px-3 text-[16px]"
           >
             {EVENT_TYPES.map(([value, label]) => (
               <option key={value} value={value}>
@@ -183,7 +183,7 @@ function EventForm({ mode, onDone }: { mode: EventSheetMode; onDone: () => void 
 
       <label className="flex min-h-11 items-center justify-between">
         <span className="text-[15px]">All day</span>
-        <input type="checkbox" className="size-5 accent-[var(--ink)]" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
+        <input type="checkbox" className="size-5 accent-[var(--primary)]" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
       </label>
       {!allDay && (
         <div className="grid grid-cols-2 gap-3">
@@ -194,7 +194,7 @@ function EventForm({ mode, onDone }: { mode: EventSheetMode; onDone: () => void 
 
       <label className="flex min-h-11 items-center justify-between">
         <span className="text-[15px]">Blocks time (busy)</span>
-        <input type="checkbox" className="size-5 accent-[var(--ink)]" checked={busy} onChange={(e) => setBusyFlag(e.target.checked)} />
+        <input type="checkbox" className="size-5 accent-[var(--primary)]" checked={busy} onChange={(e) => setBusyFlag(e.target.checked)} />
       </label>
 
       <div>
@@ -233,7 +233,7 @@ function EventForm({ mode, onDone }: { mode: EventSheetMode; onDone: () => void 
                 aria-pressed={days.includes(d)}
                 aria-label={d}
                 onClick={() => setDays(days.includes(d) ? days.filter((x) => x !== d) : [...days, d])}
-                className={`size-11 rounded-full text-sm font-medium ${days.includes(d) ? 'bg-ink text-canvas' : 'bg-line/60 text-ink-muted'}`}
+                className={`press size-11 rounded-full text-sm font-semibold ${days.includes(d) ? 'bg-primary text-on-primary' : 'bg-line/60 text-ink-muted'}`}
               >
                 {DAY_LABEL[d]}
               </button>

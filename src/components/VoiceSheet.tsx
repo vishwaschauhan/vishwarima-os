@@ -90,7 +90,7 @@ function Voice({ options }: { options: VoiceOptions }) {
             type="button"
             onClick={listening ? speech.stop : speech.start}
             aria-label={listening ? 'Stop listening' : 'Start listening'}
-            className={`relative inline-flex size-24 items-center justify-center rounded-full transition ${listening ? 'bg-garima-ink text-canvas' : 'bg-ink text-canvas'}`}
+            className={`press relative inline-flex size-24 items-center justify-center rounded-full shadow-lift ring-8 ${listening ? 'bg-garima-ink text-canvas ring-garima/70' : 'bg-primary text-on-primary ring-coral/20'}`}
           >
             {listening && <span className="absolute inset-0 animate-ping rounded-full bg-garima-ink/30 [animation-duration:1.6s]" aria-hidden />}
             {listening ? <Square size={30} fill="currentColor" /> : <Mic size={36} />}
@@ -98,7 +98,7 @@ function Voice({ options }: { options: VoiceOptions }) {
           <p role="status" className="min-h-6 text-center text-[15px] text-ink-muted">
             {listening ? 'Listening… tap to stop' : speech.state === 'done' && !speech.transcript ? 'I didn’t catch that. Tap to try again.' : 'Tap the microphone and speak'}
           </p>
-          {speech.transcript && <p className="w-full rounded-2xl bg-canvas px-4 py-3 text-[17px]">“{speech.transcript}”</p>}
+          {speech.transcript && <p className="w-full rounded-card bg-marigold-wash px-4 py-3 font-hand text-[18px]">“{speech.transcript}”</p>}
           <ErrorText>{speech.error}</ErrorText>
           {listening && (
             <button type="button" onClick={speech.cancel} className="text-[14px] text-ink-muted underline underline-offset-2">
@@ -220,7 +220,7 @@ function Preview({ heard, initial, lowConfidence, onRetry }: { heard: string; in
 
   return (
     <div className="space-y-4 pb-1">
-      <div className="flex items-start gap-2 rounded-2xl bg-canvas px-4 py-3">
+      <div className="flex items-start gap-2 rounded-card bg-marigold-wash px-4 py-3">
         <p className="min-w-0 flex-1 text-[15px]">
           <span className="block text-[12px] text-ink-muted">You said</span>“{heard}”
         </p>
@@ -254,7 +254,7 @@ function Preview({ heard, initial, lowConfidence, onRetry }: { heard: string; in
               <select
                 value={a.listId ?? ''}
                 onChange={(e) => up({ listId: e.target.value || null })}
-                className="min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-[16px]"
+                className="min-h-11 w-full rounded-2xl border border-line bg-surface px-3 text-[16px]"
               >
                 <option value="">Choose a list</option>
                 {activeLists
@@ -326,7 +326,7 @@ function Preview({ heard, initial, lowConfidence, onRetry }: { heard: string; in
               </div>
               <label className="flex min-h-11 items-center justify-between">
                 <span className="text-[15px]">Blocks time (busy)</span>
-                <input type="checkbox" className="size-5 accent-[var(--ink)]" checked={a.busy} onChange={(e) => up({ busy: e.target.checked })} />
+                <input type="checkbox" className="size-5 accent-[var(--primary)]" checked={a.busy} onChange={(e) => up({ busy: e.target.checked })} />
               </label>
               {a.recurrence.type !== 'none' && (
                 <label className="flex min-h-11 items-center justify-between">
@@ -336,7 +336,7 @@ function Preview({ heard, initial, lowConfidence, onRetry }: { heard: string; in
                       ? 'every day'
                       : `every ${[...a.recurrence.days].sort((x, y) => WEEKDAYS.indexOf(x) - WEEKDAYS.indexOf(y)).map((d) => d[0].toUpperCase() + d.slice(1)).join(', ')}`}
                   </span>
-                  <input type="checkbox" className="size-5 accent-[var(--ink)]" checked onChange={() => up({ recurrence: { type: 'none' } })} />
+                  <input type="checkbox" className="size-5 accent-[var(--primary)]" checked onChange={() => up({ recurrence: { type: 'none' } })} />
                 </label>
               )}
             </>

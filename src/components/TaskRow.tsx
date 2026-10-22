@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Clock, MessageCircle, Repeat, Sparkles } from 'lucide-react'
+import { ChevronDown, Clock, MessageCircle, Repeat, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useHousehold } from '../app/household'
 import { background } from '../app/toast'
@@ -26,11 +26,13 @@ export function Checkbox({ checked, label, onToggle, size = 'lg' }: { checked: b
       className="-m-2 inline-flex size-11 shrink-0 items-center justify-center"
     >
       <span
-        className={`${box} inline-flex items-center justify-center rounded-full border-[1.5px] transition-all duration-200 ${
-          checked ? 'scale-100 border-sage-ink bg-sage-ink text-surface' : 'border-ink-muted/50 bg-surface hover:border-ink'
+        className={`${box} check-pop inline-flex items-center justify-center rounded-full border-2 ${
+          checked ? 'border-sage-ink bg-sage-ink text-surface' : 'border-ink-muted/45 bg-surface hover:border-sage-ink'
         }`}
       >
-        <Check size={size === 'lg' ? 16 : 12} strokeWidth={3} className={`transition-all duration-200 ${checked ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`} />
+        <svg aria-hidden viewBox="0 0 16 16" className={size === 'lg' ? 'size-4' : 'size-3'}>
+          <path className="tick" d="M3.2 8.6 L6.6 11.8 L12.9 4.6" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </span>
     </button>
   )
@@ -50,10 +52,10 @@ export function TaskRow({ item, onEdit, showDate = false }: { item: AgendaTask; 
 
   if (occ.kind === 'info') {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface/60 px-4 py-3">
+      <div className="flex items-center gap-3 rounded-card border border-dashed border-shared-ink/25 bg-shared/40 px-4 py-3">
         <Sparkles size={18} className="shrink-0 text-shared-ink" aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="text-[16px] font-medium">{occ.title}</p>
+          <p className="font-hand text-[16px] font-medium">{occ.title}</p>
           <p className="text-sm text-ink-muted">{timeLabel(occ.time)}</p>
         </div>
       </div>
@@ -62,22 +64,18 @@ export function TaskRow({ item, onEdit, showDate = false }: { item: AgendaTask; 
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl border bg-surface transition-colors ${
+      className={`group relative overflow-hidden rounded-card border bg-surface shadow-paper transition-colors ${
         item.overdue ? 'border-danger/40' : 'border-line'
-      }`}
+      } ${done ? 'bg-surface/70' : ''}`}
     >
-      <span className={`absolute inset-y-0 left-0 w-1 ${OWNER_BAR[occ.owner]}`} aria-hidden />
+      <span className={`absolute inset-y-2 left-0 w-1.5 rounded-r-full ${OWNER_BAR[occ.owner]}`} aria-hidden />
       <div className="flex items-start gap-3 py-3 pr-3 pl-4">
         <div className="pt-0.5">
           <Checkbox checked={done} label={`${done ? 'Mark not done' : 'Mark done'}: ${occ.title}`} onToggle={() => fire(setCompleted(actor, item, !done))} />
         </div>
         <button className="min-w-0 flex-1 text-left" onClick={() => setOpen(!open)} aria-expanded={open}>
-          <p
-            className={`text-[16px] leading-snug font-medium transition-all duration-300 ${
-              done || skipped ? 'text-ink-muted line-through decoration-ink-muted/60' : ''
-            }`}
-          >
-            {occ.title}
+          <p className={`font-hand text-[16.5px] leading-snug font-medium transition-colors duration-300 ${done || skipped ? 'text-ink-muted' : ''}`}>
+            <span className={`strike ${done || skipped ? 'is-done' : ''}`}>{occ.title}</span>
           </p>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-ink-muted">
             {showDate && occ.date && <span>{shortDate(occ.date)}</span>}
@@ -128,7 +126,9 @@ export function TaskRow({ item, onEdit, showDate = false }: { item: AgendaTask; 
                 return (
                   <li key={s.id} className="flex items-center gap-3">
                     <Checkbox size="sm" checked={sDone} label={`${s.title}`} onToggle={() => fire(setSubtaskDone(actor, item, s.id, !sDone))} />
-                    <span className={`flex-1 text-[14px] ${sDone ? 'text-ink-muted line-through' : ''}`}>{s.title}</span>
+                    <span className={`font-hand flex-1 text-[15px] ${sDone ? 'text-ink-muted' : ''}`}>
+                      <span className={`strike ${sDone ? 'is-done' : ''}`}>{s.title}</span>
+                    </span>
                     {s.owner !== 'unassigned' && <OwnerBadge owner={s.owner} />}
                   </li>
                 )
@@ -186,7 +186,7 @@ function snoozeTarget(item: AgendaTask, today: string): string | null {
 
 export function Chip({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="min-h-9 rounded-full border border-line bg-canvas px-3.5 text-[13px] font-medium transition hover:border-ink-muted">
+    <button type="button" onClick={onClick} className="press min-h-9 rounded-full border border-line bg-canvas px-3.5 text-[13px] font-semibold hover:border-ink-muted/60">
       {children}
     </button>
   )

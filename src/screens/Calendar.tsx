@@ -13,6 +13,7 @@ import { addDays, dateRange, isLocalDate, startOfWeek } from '../domain/dates'
 import { longDate } from '../lib/format'
 import { QuickAdd } from './Today'
 import { MicButton } from '../components/AddMenu'
+import { PageTitle } from '../components/paint'
 
 /** The family calendar: events and busy blocks two weeks at a time, with overlap and childcare warnings. */
 export function Calendar() {
@@ -31,12 +32,9 @@ export function Calendar() {
   return (
     <div>
       <div className="flex items-end justify-between gap-2">
-        <div>
-          <p className="text-[13px] font-semibold tracking-wide text-ink-muted uppercase">Family calendar</p>
-          <h1 className="font-serif text-[28px] leading-tight tracking-tight">
-            {longDate(from, timezone, { month: 'short', day: 'numeric' })} – {longDate(to, timezone, { month: 'short', day: 'numeric' })}
-          </h1>
-        </div>
+        <PageTitle eyebrow="Family calendar" size="md">
+          {longDate(from, timezone, { month: 'short', day: 'numeric' })} – {longDate(to, timezone, { month: 'short', day: 'numeric' })}
+        </PageTitle>
         <StepNav label="Change dates" prevLabel="Previous two weeks" nextLabel="Next two weeks" onPrev={() => go(addDays(from, -14))} onNext={() => go(addDays(from, 14))} />
       </div>
 
@@ -44,8 +42,8 @@ export function Calendar() {
         <OwnerFilterBar value={owner} onChange={setOwner} myId={myId} />
       </div>
       <div className="mt-3 grid grid-cols-3 gap-2">
-        <QuickAdd icon={<CalendarPlus size={18} />} label="Event" onClick={() => setSheet({ kind: 'new', date: addDate })} />
-        <QuickAdd icon={<CircleSlash size={18} />} label="Busy" onClick={() => setSheet({ kind: 'new', date: addDate, busy: true })} />
+        <QuickAdd icon={<CalendarPlus size={16} />} label="Event" tone="teal" onClick={() => setSheet({ kind: 'new', date: addDate })} />
+        <QuickAdd icon={<CircleSlash size={16} />} label="Busy" tone="lavender" onClick={() => setSheet({ kind: 'new', date: addDate, busy: true })} />
         <MicButton />
       </div>
       <p className="mt-3 text-[13px] text-ink-muted">
@@ -64,12 +62,13 @@ export function Calendar() {
             if (shown.length === 0 && d !== today) return null
             return (
               <section key={d}>
-                <h2 className={`mb-2 text-[15px] font-semibold ${d === today ? '' : 'text-ink-muted'}`}>
+                <h2 className={`mb-2 flex items-center gap-2 font-serif text-[18px] font-medium tracking-tight ${d === today ? '' : 'text-ink-muted'}`}>
+                  {d === today && <span aria-hidden className="size-2 rounded-full bg-marigold" />}
                   {d === today ? 'Today · ' : ''}
                   {longDate(d, timezone, { weekday: 'long', month: 'short', day: 'numeric' })}
                 </h2>
                 {gaps.map((g, i) => (
-                  <p key={i} role="status" className="mb-2 flex gap-2 rounded-xl bg-garima/60 px-3.5 py-2.5 text-[13px] text-garima-ink">
+                  <p key={i} role="status" className="mb-2 flex gap-2 rounded-2xl bg-garima/60 px-3.5 py-2.5 text-[13px] font-medium text-garima-ink ring-1 ring-garima-ink/15">
                     <TriangleAlert size={15} className="mt-0.5 shrink-0" aria-hidden />
                     You’re both busy {formatMinutes(g.start)} – {formatMinutes(g.end)}. Who has the kids?
                   </p>

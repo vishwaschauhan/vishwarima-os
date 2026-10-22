@@ -16,7 +16,7 @@ import { Button } from './ui'
  */
 export function MessageText({ body, linkify = true }: { body: string; linkify?: boolean }) {
   return (
-    <span className="block text-[16px] leading-snug break-words whitespace-pre-wrap">
+    <span className="font-hand block text-[16.5px] leading-snug break-words whitespace-pre-wrap">
       {body.split('\n').map((line, i) => (
         <Fragment key={i}>
           {i > 0 && '\n'}

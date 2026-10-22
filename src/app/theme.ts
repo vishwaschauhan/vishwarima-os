@@ -3,7 +3,7 @@ import { useStoredState } from './useStoredState'
 export type ThemeChoice = 'system' | 'light' | 'dark'
 
 const KEY = 'theme'
-const COLORS = { light: '#FAF9F6', dark: '#1C1B1A' }
+const COLORS = { light: '#FCF7EF', dark: '#1D1916' }
 
 /** Applies the theme to <html> and the browser chrome colour. Called before the first render to avoid a flash. */
 export function applyTheme(choice: ThemeChoice) {

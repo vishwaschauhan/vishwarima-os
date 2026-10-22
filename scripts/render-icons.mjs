@@ -10,8 +10,8 @@ const page = await browser.newPage()
 async function render(file, size, { padding = 0, radius = 0 } = {}) {
   await page.setViewportSize({ width: size, height: size })
   const inner = size * (1 - 2 * padding)
-  await page.setContent(`<html><body style="margin:0;background:#FAF9F6">
-    <div style="width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:${radius}px;background:#FBE6D4">
+  await page.setContent(`<html><body style="margin:0;background:#FCF7EF">
+    <div style="width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:${radius}px;background:#F8D9C4">
       <div style="width:${inner}px;height:${inner}px">${svg.replace('<svg ', '<svg width="100%" height="100%" ')}</div>
     </div></body></html>`)
   await page.screenshot({ path: file, omitBackground: radius > 0 })

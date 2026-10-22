@@ -106,7 +106,7 @@ function ListRow({ list, onUp, onDown }: { list: ListDef; onUp?: () => void; onD
         onChange={(e) => setTitle(e.target.value)}
         onBlur={save}
         onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-        className="min-h-10 min-w-0 flex-1 rounded-lg bg-transparent px-1 text-[15px] outline-none focus:bg-canvas"
+        className="min-h-10 min-w-0 flex-1 rounded-lg bg-transparent px-1 text-[15px] outline-none focus:bg-canvas focus:ring-2 focus:ring-teal-ink/30"
       />
       <span className="shrink-0 text-[12px] text-ink-muted">{list.type === 'shopping' ? 'Shopping' : 'To-do'}</span>
       <Icon label={`Move ${list.title} up`} onClick={onUp}>

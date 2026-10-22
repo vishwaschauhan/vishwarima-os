@@ -28,18 +28,24 @@ export function EventRow({
   return (
     <Tag
       {...(Tag === 'button' ? { onClick: () => onOpen?.(e) } : {})}
-      className={`flex w-full items-start gap-3 rounded-2xl px-4 py-3 text-left ${
-        e.busy ? 'bg-[repeating-linear-gradient(135deg,var(--line)_0_1px,transparent_1px_8px)] ring-1 ring-line ring-inset' : 'bg-sage/60'
+      className={`flex w-full items-start gap-3 rounded-card px-4 py-3 text-left ${Tag === 'button' ? 'press' : ''} ${
+        e.busy
+          ? 'bg-[repeating-linear-gradient(135deg,var(--line)_0_1px,transparent_1px_8px)] ring-1 ring-line ring-inset'
+          : 'bg-teal/80 ring-1 ring-teal-ink/15 ring-inset'
       }`}
     >
-      <span className="mt-0.5 shrink-0 text-ink-muted" aria-hidden>
-        {e.visibility === 'private' ? <Lock size={18} /> : <CalendarClock size={18} />}
+      {/* Events get a calendar badge instead of a checkbox: they happen, they aren't ticked off. */}
+      <span
+        className={`inline-flex size-8 shrink-0 items-center justify-center rounded-xl ${e.busy ? 'bg-surface text-ink-muted ring-1 ring-line' : 'bg-surface/80 text-teal-ink'}`}
+        aria-hidden
+      >
+        {e.visibility === 'private' ? <Lock size={16} /> : <CalendarClock size={16} />}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[16px] leading-snug font-medium">{title(e)}</span>
+        <span className="font-hand block text-[16.5px] leading-snug font-medium">{title(e)}</span>
         <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[13px] text-ink-muted">
           {showDate && <span>{shortDate(instance.date)}</span>}
-          <span>{eventTimeLabel(e)}</span>
+          <span className="font-semibold text-ink">{eventTimeLabel(e)}</span>
           <span>{e.visibility === 'private' ? (mine ? 'Private · partner sees “Busy”' : 'Private') : TYPE_LABEL[e.type]}</span>
           {e.busy && <span>Busy</span>}
           {e.recurrence.type !== 'none' && <span>Repeats</span>}

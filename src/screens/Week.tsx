@@ -6,6 +6,7 @@ import { useAgenda } from '../app/useAgenda'
 import { useStoredState } from '../app/useStoredState'
 import { OwnerFilterBar, Segmented, Skeleton, StepNav } from '../components/bits'
 import { OWNER_BAR } from '../components/owners'
+import { PageTitle } from '../components/paint'
 import { DayAgenda, type KindFilter, type StatusFilter } from '../components/DayAgenda'
 import { EventSheet, type EventSheetMode } from '../components/EventSheet'
 import { useEventTitle } from '../components/eventLabels'
@@ -48,16 +49,13 @@ export function Week() {
   return (
     <div>
       <div className="flex items-end justify-between gap-2">
-        <div>
-          <p className="text-[13px] font-semibold tracking-wide text-ink-muted uppercase">{pilotMode ? 'Pilot' : 'Week of'}</p>
-          <h1 className="font-serif text-[28px] leading-tight tracking-tight">
-            {longDate(from, timezone, { month: 'short', day: 'numeric' })} – {longDate(to, timezone, { month: 'short', day: 'numeric' })}
-          </h1>
-        </div>
+        <PageTitle eyebrow={pilotMode ? 'Pilot' : 'Week of'} size="md">
+          {longDate(from, timezone, { month: 'short', day: 'numeric' })} – {longDate(to, timezone, { month: 'short', day: 'numeric' })}
+        </PageTitle>
         {!pilotMode && (
           <StepNav label="Change week" prevLabel="Previous week" nextLabel="Next week" onPrev={() => select(addDays(from, -7))} onNext={() => select(addDays(from, 7))}>
             {(today < from || today > to) && (
-              <button onClick={() => select(today)} className="ml-1 min-h-9 rounded-full bg-ink px-3.5 text-[13px] font-medium text-canvas">
+              <button onClick={() => select(today)} className="press ml-1 min-h-9 rounded-full bg-primary px-3.5 text-[13px] font-semibold text-on-primary">
                 Today
               </button>
             )}
@@ -66,9 +64,9 @@ export function Week() {
       </div>
 
       {pilot && (
-        <label className="mt-3 flex min-h-11 items-center justify-between rounded-2xl border border-line bg-surface px-4">
+        <label className="mt-3 flex min-h-11 items-center justify-between rounded-card border border-line bg-surface px-4 shadow-paper">
           <span className="text-[14px]">Show both pilot weeks</span>
-          <input type="checkbox" className="size-5 accent-[var(--ink)]" checked={pilotMode} onChange={(e) => setPilotMode(e.target.checked)} />
+          <input type="checkbox" className="size-5 accent-[var(--primary)]" checked={pilotMode} onChange={(e) => setPilotMode(e.target.checked)} />
         </label>
       )}
 
@@ -99,8 +97,8 @@ export function Week() {
       </div>
 
       {/* Phones: a date strip plus the selected day's agenda. */}
-      <div className="-mx-5 mt-4 overflow-x-auto px-5 lg:hidden">
-        <div className="flex gap-1" role="tablist" aria-label="Days">
+      <div className="-mx-5 mt-4 overflow-x-auto px-5 py-1 lg:hidden">
+        <div className="flex gap-1.5" role="tablist" aria-label="Days">
           {days.map((d) => {
             const p = dayProgress(tasks, d)
             const hasGap = coverageGaps(instances.filter((i) => i.date === d)).length > 0
@@ -112,16 +110,22 @@ export function Week() {
                 aria-selected={isSel}
                 aria-label={longDate(d, timezone)}
                 onClick={() => select(d)}
-                className={`flex min-w-10 flex-1 flex-col items-center rounded-2xl py-2 transition ${
-                  isSel ? 'bg-ink text-canvas' : d === today ? 'bg-surface ring-1 ring-ink/40' : 'bg-surface ring-1 ring-line'
+                className={`press flex min-w-10 flex-1 flex-col items-center rounded-[18px_20px_16px_20px] py-2 ${
+                  isSel
+                    ? 'bg-primary text-on-primary shadow-lift'
+                    : d === today
+                      ? 'paint-wash bg-surface shadow-paper ring-2 ring-marigold'
+                      : 'bg-surface shadow-paper ring-1 ring-line'
                 }`}
               >
-                <span className={`text-[11px] font-medium uppercase ${isSel ? 'text-canvas/70' : 'text-ink-muted'}`}>
+                <span className={`text-[11px] font-semibold uppercase ${isSel ? 'text-on-primary/80' : 'text-ink-muted'}`}>
                   {longDate(d, timezone, { weekday: 'narrow' })}
                 </span>
-                <span className="text-[17px] font-semibold">{Number(d.slice(8))}</span>
+                <span className="font-serif text-[19px] font-medium">{Number(d.slice(8))}</span>
                 <span className="mt-0.5 flex h-1.5 gap-0.5">
-                  {p.total > 0 && <span className={`size-1.5 rounded-full ${p.done === p.total ? 'bg-sage-ink' : isSel ? 'bg-canvas/60' : 'bg-ink-muted/50'}`} />}
+                  {p.total > 0 && (
+                    <span className={`size-1.5 rounded-full ${p.done === p.total ? (isSel ? 'bg-on-primary' : 'bg-sage-ink') : isSel ? 'bg-on-primary/50' : 'bg-ink-muted/50'}`} />
+                  )}
                   {hasGap && <span className="size-1.5 rounded-full bg-danger" />}
                 </span>
               </button>
@@ -131,7 +135,7 @@ export function Week() {
       </div>
 
       <div className="mt-5 lg:hidden">
-        <h2 className="mb-3 text-[17px] font-semibold">{longDate(selected, timezone)}</h2>
+        <h2 className="mb-3 font-serif text-[20px] font-medium tracking-tight">{longDate(selected, timezone)}</h2>
         {loading && tasks.length === 0 ? (
           <Skeleton />
         ) : (
@@ -151,10 +155,13 @@ export function Week() {
         {days.map((d) => {
           const p = dayProgress(tasks, d)
           return (
-            <section key={d} className={`min-h-48 rounded-2xl border p-2 ${d === today ? 'border-ink/40 bg-surface' : 'border-line bg-surface/70'}`}>
-              <button onClick={() => select(d)} className="mb-2 w-full px-1 text-left">
-                <span className="block text-[11px] font-medium text-ink-muted uppercase">{longDate(d, timezone, { weekday: 'short' })}</span>
-                <span className="text-[18px] font-semibold">{Number(d.slice(8))}</span>
+            <section
+              key={d}
+              className={`min-h-48 rounded-card border p-2 shadow-paper ${d === today ? 'border-marigold bg-surface' : 'border-line bg-surface/75'} ${d === selected ? 'ring-2 ring-primary/50' : ''}`}
+            >
+              <button onClick={() => select(d)} className={`mb-2 w-full rounded-2xl px-2 py-1 text-left ${d === today ? 'paint-wash' : ''}`}>
+                <span className="block text-[11px] font-semibold text-ink-muted uppercase">{longDate(d, timezone, { weekday: 'short' })}</span>
+                <span className="font-serif text-[20px] font-medium">{Number(d.slice(8))}</span>
                 {p.total > 0 && (
                   <span className="ml-2 text-[11px] text-ink-muted">
                     {p.done}/{p.total}
@@ -166,7 +173,7 @@ export function Week() {
                   <li key={`${i.event.id}-${d}`}>
                     <button
                       onClick={() => setEventSheet({ kind: 'edit', event: i.event })}
-                      className="flex w-full items-start gap-1 rounded-lg bg-sage/60 px-1.5 py-1 text-left text-[12px] leading-tight"
+                      className="font-hand flex w-full items-start gap-1 rounded-lg bg-teal/80 px-1.5 py-1 text-left text-[12.5px] leading-tight text-ink ring-1 ring-teal-ink/15 ring-inset"
                     >
                       {i.event.visibility === 'private' ? <Lock size={11} className="mt-0.5 shrink-0" /> : <CalendarClock size={11} className="mt-0.5 shrink-0" />}
                       <span>
@@ -182,12 +189,12 @@ export function Week() {
                     <li key={t.occ.key}>
                       <button
                         onClick={() => setTaskSheet({ kind: 'edit', item: t })}
-                        className={`relative w-full overflow-hidden rounded-lg bg-canvas py-1 pr-1.5 pl-2.5 text-left text-[12px] leading-tight ${
-                          t.completed ? 'text-ink-muted line-through' : ''
+                        className={`font-hand relative w-full overflow-hidden rounded-lg bg-canvas py-1 pr-1.5 pl-2.5 text-left text-[12.5px] leading-tight ring-1 ring-line ring-inset ${
+                          t.completed ? 'text-ink-muted' : ''
                         } ${t.overdue ? 'text-danger' : ''}`}
                       >
                         <span className={`absolute inset-y-0 left-0 w-1 ${OWNER_BAR[t.occ.owner]}`} />
-                        {t.occ.title}
+                        <span className={`strike ${t.completed ? 'is-done' : ''}`}>{t.occ.title}</span>
                       </button>
                     </li>
                   ))}
@@ -197,7 +204,7 @@ export function Week() {
         })}
       </div>
       <div className="mt-6 hidden lg:block">
-        <h2 className="mb-3 text-[17px] font-semibold">{longDate(selected, timezone)}</h2>
+        <h2 className="mb-3 font-serif text-[20px] font-medium tracking-tight">{longDate(selected, timezone)}</h2>
         <DayAgenda
           date={selected}
           tasks={tasks}

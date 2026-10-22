@@ -51,5 +51,21 @@ for (const colorScheme of ['light', 'dark'] as const) {
     await v.getByRole('button', { name: 'Task', exact: true }).click()
     await v.waitForTimeout(500)
     await snap(v, `${colorScheme}-new-task`)
+    await v.keyboard.press('Escape')
+
+    await v.getByRole('link', { name: 'Whiteboard' }).click()
+    await v.getByLabel('Write a message').fill('Pediatrician moved to Friday 10 AM. Can you take the morning?')
+    await v.getByRole('button', { name: 'Send' }).click()
+    await v.waitForTimeout(500)
+    await snap(v, `${colorScheme}-whiteboard`)
+
+    // Desktop layout: sidebar, Today and the seven-column week.
+    await v.setViewportSize({ width: 1280, height: 860 })
+    await v.getByRole('link', { name: 'Today' }).first().click()
+    await v.waitForTimeout(500)
+    await snap(v, `${colorScheme}-desktop-today`)
+    await v.getByRole('link', { name: 'Week' }).first().click()
+    await v.waitForTimeout(500)
+    await snap(v, `${colorScheme}-desktop-week`)
   })
 }

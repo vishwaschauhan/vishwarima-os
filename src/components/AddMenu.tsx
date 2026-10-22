@@ -17,7 +17,7 @@ export function AddButton() {
       type="button"
       onClick={openAddMenu}
       aria-label="Quick add"
-      className="fixed right-5 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-20 inline-flex size-14 items-center justify-center rounded-full bg-ink text-canvas shadow-[0_6px_24px_rgba(0,0,0,0.18)] transition active:scale-95 lg:right-8 lg:bottom-8"
+      className="press fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 inline-flex size-14 items-center justify-center rounded-[22px_26px_22px_26px] bg-primary text-on-primary shadow-lift ring-4 ring-canvas/70 hover:brightness-105 lg:right-8 lg:bottom-8"
     >
       <Plus size={26} />
     </button>
@@ -84,11 +84,11 @@ function Option({ icon, label, onClick, wide }: { icon: ReactNode; label: string
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-h-20 flex-col items-center justify-center gap-1.5 rounded-2xl text-[15px] font-medium transition ${
-        wide ? 'col-span-2 bg-ink text-canvas' : 'border border-line bg-canvas hover:border-ink-muted'
+      className={`press flex min-h-20 flex-col items-center justify-center gap-1.5 rounded-card text-[15px] font-semibold ${
+        wide ? 'col-span-2 bg-primary text-on-primary shadow-paper' : 'border border-line bg-canvas shadow-paper hover:border-ink-muted/60'
       }`}
     >
-      <span aria-hidden className={wide ? '' : 'text-ink-muted'}>
+      <span aria-hidden className={wide ? '' : 'text-primary'}>
         {icon}
       </span>
       {label}
@@ -104,7 +104,7 @@ export function MicButton({ listId, label = 'Voice', compact = false }: { listId
         type="button"
         onClick={() => openVoice({ listId })}
         aria-label="Add by voice"
-        className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-ink-muted transition hover:bg-line/50 hover:text-ink"
+        className="press inline-flex size-10 shrink-0 items-center justify-center rounded-full text-garima-ink hover:bg-garima/60"
       >
         <Mic size={20} />
       </button>
@@ -115,9 +115,11 @@ export function MicButton({ listId, label = 'Voice', compact = false }: { listId
       type="button"
       onClick={() => openVoice({ listId })}
       aria-label="Add by voice"
-      className="flex min-h-12 items-center justify-center gap-1.5 rounded-2xl border border-line bg-surface px-1 text-[14px] font-medium transition hover:border-ink-muted"
+      className="press flex min-h-12 items-center justify-center gap-1.5 rounded-card border border-line bg-surface px-1 text-[14px] font-semibold shadow-paper hover:border-ink-muted/60"
     >
-      <Mic size={18} className="text-garima-ink" aria-hidden />
+      <span aria-hidden className="inline-flex size-7 items-center justify-center rounded-full bg-garima text-garima-ink">
+        <Mic size={16} />
+      </span>
       {label}
     </button>
   )

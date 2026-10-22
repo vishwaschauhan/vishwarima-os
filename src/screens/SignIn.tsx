@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { BrushUnderline, PaintedHeart, Sprig } from '../components/paint'
 import { Button, ErrorText, Field, Portrait } from '../components/ui'
 import { friendlyError } from '../lib/errors'
 import { signInWithEmail, signInWithGoogle, signUpWithEmail } from '../lib/authActions'
@@ -29,12 +30,23 @@ export function SignIn() {
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-xl flex-col">
-      <div className="overflow-hidden sm:mt-8 sm:rounded-3xl">
-        <Portrait className="aspect-[4/3]" />
+      {/* The whole portrait, uncropped, fading into the paper at the bottom like a watercolor edge. */}
+      <div className="relative sm:mt-8">
+        <div className="overflow-hidden [mask-image:linear-gradient(to_bottom,black_78%,transparent)] sm:rounded-t-[32px]">
+          <Portrait className="aspect-[4/3]" />
+        </div>
       </div>
-      <div className="flex flex-1 flex-col px-6 pt-8 pb-10">
-        <h1 className="font-serif text-[34px] leading-tight tracking-tight">VishwarimaOS</h1>
-        <p className="mt-2 text-[17px] text-ink-muted">Our days, beautifully organized.</p>
+      <div className="relative flex flex-1 flex-col px-6 pt-4 pb-10">
+        <Sprig className="absolute top-0 right-5 h-10 w-24" flip />
+        <h1 className="relative inline-block self-start font-serif text-[38px] leading-tight font-medium tracking-tight">
+          <span className="relative z-[1]">
+            Vishwarima<span className="text-primary">OS</span>
+          </span>
+          <BrushUnderline className="absolute bottom-0 left-0 w-full" />
+        </h1>
+        <p className="mt-3 flex items-center gap-2 font-serif text-[19px] text-ink-muted italic">
+          Our days, beautifully organized. <PaintedHeart className="size-4" />
+        </p>
 
         <div className="mt-auto space-y-3 pt-10">
           {mode === 'choose' ? (
@@ -77,7 +89,7 @@ export function SignIn() {
             </form>
           )}
           <ErrorText>{error}</ErrorText>
-          <p className="pt-2 text-center text-[13px] text-ink-muted">A little more organized, a lot more together.</p>
+          <p className="pt-2 text-center font-serif text-[14px] text-ink-muted italic">A little more organized, a lot more together.</p>
         </div>
       </div>
     </main>
